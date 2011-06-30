@@ -10,17 +10,13 @@ import java.lang.annotation.Target;
 /**
  * Created by IntelliJ IDEA.
  * User: jumiller
- * Date: Feb 24, 2011
- * Time: 12:26:51 PM
+ * Date: Jun 22, 2011
+ * Time: 9:14:01 AM
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Column
+public @interface OrderedColumn
 {
-    String value() default "";
-    boolean nullable() default false;
-    String defaultValue() default "-1";
-    boolean updateKey() default false;
-    SortOrder sortOrder() default SortOrder.UNDEFINED;
-    int orderByPosition() default 0; 
+    SortOrder sortOrder() default SortOrder.ASCENDING;
+    int orderPosition() default 0;
 }

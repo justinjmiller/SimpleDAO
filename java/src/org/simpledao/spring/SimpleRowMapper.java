@@ -1,10 +1,9 @@
 package org.simpledao.spring;
 
-import org.sf.simpledao.Utils;
-import org.springframework.jdbc.core.RowMapper;
+import org.simpledao.ColumnDefinition;
+import org.simpledao.ReflectionUtils;
+import org.simpledao.Utils;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
@@ -34,7 +33,7 @@ public class SimpleRowMapper<T>
         try
         {
         T newObject = beanType.newInstance();
-          Map<String,String> propMap = Utils.getBeanPropertyMap(newObject);
+          Map<String, ColumnDefinition> propMap = ReflectionUtils.getBeanPropertyDBColumnMap(newObject);
             System.out.println(propMap.size());
 //        T newObject = (T)type.getClass().newInstance();
             return newObject;

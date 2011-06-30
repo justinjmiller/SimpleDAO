@@ -1,4 +1,4 @@
-package org.sf.simpledao.lookuplist;
+package org.simpledao.lookuplist;
 
 /**
  * <p/>
