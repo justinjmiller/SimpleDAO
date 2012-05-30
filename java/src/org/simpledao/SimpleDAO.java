@@ -196,55 +196,58 @@ public class SimpleDAO<T>
             {
                 for ( int i = 1; i <= columnCount ; i++)
                 {
-					if ( metaData.getColumnType(i) == Types.BLOB )
-					{
-						if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + " is a BLOB");}
-
-						Blob blob = rs.getBlob( metaData.getColumnName(i) );
-
-						ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-						BufferedInputStream bis = new BufferedInputStream( blob.getBinaryStream() );
-
-						byte[] buffer = new byte[1024];
-						int curByte;
-                        try
+                    if ( columnPropertyMap.containsKey(metaData.getColumnName((i))))
+                    {
+                        if ( metaData.getColumnType(i) == Types.BLOB )
                         {
-                            while ( ( curByte = bis.read( buffer, 0, buffer.length ) ) != -1 )
+                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + " is a BLOB");}
+
+                            Blob blob = rs.getBlob( metaData.getColumnName(i) );
+
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+                            BufferedInputStream bis = new BufferedInputStream( blob.getBinaryStream() );
+
+                            byte[] buffer = new byte[1024];
+                            int curByte;
+                            try
                             {
-                                baos.write( buffer, 0, curByte );
+                                while ( ( curByte = bis.read( buffer, 0, buffer.length ) ) != -1 )
+                                {
+                                    baos.write( buffer, 0, curByte );
+                                }
                             }
-                        }
-                        catch (IOException e)
-                        {
-                            log.error(e);
-                            throw new RuntimeException("Unable to read the blob from the database",e);
-                        }
-                        //props.put( Utils.getCamelCaseColumnName( metaData.getColumnName(i) ), baos.toByteArray() );
-						if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - write BLOB to bean'" );}
+                            catch (IOException e)
+                            {
+                                log.error(e);
+                                throw new RuntimeException("Unable to read the blob from the database",e);
+                            }
+                            //props.put( Utils.getCamelCaseColumnName( metaData.getColumnName(i) ), baos.toByteArray() );
+                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - write BLOB to bean'" );}
 
-						props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getString(i) );
-					}
-					else if ( metaData.getColumnType(i) == Types.DATE )
-					{
-						if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a DATE");}
-						props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTimestamp(i) );
-					}
-					else if ( metaData.getColumnType(i) == Types.TIME )
-					{
-						if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIME");}
-						props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTime(i) );
-					}
-					else if ( metaData.getColumnType(i) == Types.TIMESTAMP )
-					{
-						if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIMESTAMP");}
-						props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTimestamp(i) );
-					}
-					else
-					{
-						if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is not special");}
-						//props.put( Utils.getCamelCaseColumnName( metaData.getColumnName(i) ), rs.getString(i) );
-						props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getString(i) );
-					}
+                            props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getString(i) );
+                        }
+                        else if ( metaData.getColumnType(i) == Types.DATE )
+                        {
+                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a DATE");}
+                            props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTimestamp(i) );
+                        }
+                        else if ( metaData.getColumnType(i) == Types.TIME )
+                        {
+                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIME");}
+                            props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTime(i) );
+                        }
+                        else if ( metaData.getColumnType(i) == Types.TIMESTAMP )
+                        {
+                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIMESTAMP");}
+                            props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTimestamp(i) );
+                        }
+                        else
+                        {
+                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is not special");}
+                            //props.put( Utils.getCamelCaseColumnName( metaData.getColumnName(i) ), rs.getString(i) );
+                            props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getString(i) );
+                        }
+                    }
 
 				}
 
@@ -506,7 +509,7 @@ public class SimpleDAO<T>
                 int paramEnd = loopsql.indexOf(" ", paramStart);
                 if ( paramEnd > paramStart)
                 {
-                    param = loopsql.substring(paramStart, paramEnd - paramStart);
+                    param = loopsql.substring(paramStart, paramEnd );
                 }
                 else
                 {
@@ -528,7 +531,7 @@ public class SimpleDAO<T>
                 bindVariables.add( new BoundVariable( paramCount, descriptor.getPropertyMap().get(param).getName(), pd.getPropertyType(), value));
 //                bindVariables.add( new BoundVariable( paramCount, Utils.getPropertyDBName(param), pd.getPropertyType(), value));
                 sql = sql.replace("@" + param, "?");
-                loopsql = loopsql.substring( loopsql.indexOf(param) + param.length());
+                loopsql = loopsql.substring( loopsql.indexOf("@" + param) + param.length());
             }
         }
         else
@@ -643,7 +646,6 @@ public class SimpleDAO<T>
         int columnCount = 0;
         int keyCount = 0;
 
-
         sql.append( description.getTable()  );
 
         sql.append( " SET " );
@@ -652,8 +654,8 @@ public class SimpleDAO<T>
 
         for (String property : description.getPropertyMap().keySet())
         {
-
-            String column = description.getPropertyMap().get(property).getName();
+            ColumnDefinition def = description.getPropertyMap().get(property);
+            String column = def.getName();
             if (column == null || "".equals(column))
             {
                 column = Utils.getPropertyDBName(property);
@@ -687,6 +689,7 @@ public class SimpleDAO<T>
                 whereSQL.append(column);
                 whereSQL.append(" = ?");
 
+                //todo: this count can go away, just use the size of the key BB list
                 keyCount++;
                 keyBindVariables.add( new BoundVariable( keyCount, column, pd.getPropertyType(), value ) );
             }
@@ -694,22 +697,32 @@ public class SimpleDAO<T>
             {
                 Class type = pd.getPropertyType();
                 StringBuffer col = new StringBuffer();
-				if (value == null ||
-				  (type == Integer.class || "int".equals(type.getName())) && ((Integer) value < 0) ||
-				  ( type == Double.class || "double".equals( type.getName() ) ) && ((Double) value < 0.0d))
-				{
-					continue;
-				}
-
                 if (columnCount > 0)
                 {
                     col.append(", ");
                 }
                 col.append(column);
                 col.append(" = ");
-                col.append("?");
-                columnCount++;
+
+//				if (value == null ||
+//				  (type == Integer.class || "int".equals(type.getName())) && ((Integer) value < 0) ||
+//				  ( type == Double.class || "double".equals( type.getName() ) ) && ((Double) value < 0.0d))
+                if ( Utils.isPropertyNull( type, value) )
+				{
+                    if ( def.isNullable() )
+                    {
+                        col.append("NULL");
+                        columnCount++;
+                    }
+                    else
+                        continue;
+				}
+                else
+                {
+                    col.append("?");
+                    columnCount++;
                 bindVariables.add(new BoundVariable(columnCount, column, type, value));
+                }
                 sql.append(col);
             }
         }

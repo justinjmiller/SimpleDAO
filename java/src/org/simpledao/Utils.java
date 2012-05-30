@@ -177,6 +177,9 @@ public class Utils
         if  ( ( type == Integer.class || "int".equals( type.getName() ) ) && ((Integer) value < 0) )
             return true;
 
+        if  ( ( type == Long.class || "long".equals( type.getName() ) ) && ((Long) value < 0) )
+            return true;
+
         if ( type == String.class && "".equals( value ) )
             return true;
 

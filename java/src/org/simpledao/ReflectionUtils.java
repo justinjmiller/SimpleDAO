@@ -303,19 +303,5 @@ public class ReflectionUtils
         }
     }
 
-    public static boolean isPropertyNull(PropertyDescriptor pd, Object value)
-    {
-        if ( value == null )
-        {
-            return true;
-        }
 
-        // not an object type, check primitives and the annoation (if it exists)
-        return false;
-    }
-
-    public static boolean isPropertyNullable(PropertyDescriptor pd)
-    {
-        return false;
-    }
 }

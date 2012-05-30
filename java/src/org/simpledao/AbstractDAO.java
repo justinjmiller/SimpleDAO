@@ -37,7 +37,7 @@ public abstract class AbstractDAO<T>
         }
     }
 
-    public List<T> GetList(T criteria)
+    public List<T> getList(T criteria)  throws SQLException
     {
         if ( log.isDebugEnabled()) { log.debug("GetList('" + criteria.getClass().getName() + "') - begin");}
         Connection con = null;
@@ -46,11 +46,13 @@ public abstract class AbstractDAO<T>
             con = getConnection();
             return dao.simpleSelectList(con, criteria);
         }
+/*
         catch ( SQLException ex)
         {
             log.error(ex);
             return null;
         }
+*/
         finally
         {
             closeConnection(con);
@@ -58,7 +60,7 @@ public abstract class AbstractDAO<T>
         }
     }
 
-    public T Get(T criteria)
+    public T get(T criteria) throws SQLException
     {
         if ( log.isDebugEnabled()) { log.debug("Get('" + criteria.getClass().getName() + "') - begin");}
         Connection con = null;
@@ -67,11 +69,13 @@ public abstract class AbstractDAO<T>
             con = getConnection();
             return dao.simpleSelect(con, criteria);
         }
+/*
         catch ( SQLException ex)
         {
             log.error(ex);
             return null;
         }
+*/
         finally
         {
             closeConnection(con);
@@ -79,7 +83,7 @@ public abstract class AbstractDAO<T>
         }
     }
 
-    public void Insert(T criteria)
+    public void insert(T criteria) throws SQLException
     {
         if ( log.isDebugEnabled()) { log.debug("Insert('" + criteria.getClass().getName() + "') - begin");}
         Connection con = null;
@@ -88,10 +92,12 @@ public abstract class AbstractDAO<T>
             con = getConnection();
             dao.simpleInsert(con, criteria);
         }
+/*
         catch ( SQLException ex)
         {
             log.error(ex);
         }
+*/
         finally
         {
             closeConnection(con);
@@ -100,7 +106,7 @@ public abstract class AbstractDAO<T>
 
     }
 
-    public void Update(T criteria)
+    public void update(T criteria) throws SQLException
     {
         if ( log.isDebugEnabled()) { log.debug("Update('" + criteria.getClass().getName() + "') - begin");}
         Connection con = null;
@@ -109,10 +115,12 @@ public abstract class AbstractDAO<T>
             con = getConnection();
             dao.simpleUpdate(con, criteria);
         }
+/*
         catch ( SQLException ex)
         {
             log.error(ex);
         }
+*/
         finally
         {
             closeConnection(con);
@@ -120,7 +128,7 @@ public abstract class AbstractDAO<T>
         }
     }
 
-    public void Delete(T criteria)
+    public void delete(T criteria) throws SQLException
     {
         if ( log.isDebugEnabled()) { log.debug("GetList('" + criteria.getClass().getName() + "') - begin");}
         Connection con = null;
@@ -129,10 +137,12 @@ public abstract class AbstractDAO<T>
             con = getConnection();
             dao.simpleDelete(con, criteria);
         }
+/*
         catch ( SQLException ex)
         {
             log.error(ex);
         }
+*/
         finally
         {
             closeConnection(con);

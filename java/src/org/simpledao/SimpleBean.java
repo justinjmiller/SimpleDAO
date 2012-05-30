@@ -146,7 +146,15 @@ public abstract class SimpleBean
     @ExcludedProperty
     public Map<Integer, SortedColumn> getDBOrderBy()
     {
-        return dbOrderBy;
+        if ( dbOrderBy == null  )
+        {
+            dbOrderBy = ReflectionUtils.getBeanDBOrderBy(this);
+            return dbOrderBy;
+        }
+        else
+        {
+            return dbOrderBy;
+        }
     }
 
     public void setDBOrderBy(Map<Integer, SortedColumn> dbOrderBy)
