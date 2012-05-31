@@ -28,6 +28,8 @@ namespace SimpleDAO
 
         public char WildcardChar { get; set; }
 
+        public char ParameterIndicator { get; set; }
+
         public string ConnectionString { get; set; }
 
         public SimpleDAO()
@@ -35,7 +37,14 @@ namespace SimpleDAO
             NullIntValue = 0;
             NullStringValue = null;
             NullDateTimeValue = DateTime.MinValue;
-            WildcardChar = '%';
+            WildcardChar = '@';
+            ParameterIndicator = ':';
+        }
+
+        public SimpleDAO(char parameterIndicator)
+            : base()
+        {
+            ParameterIndicator = parameterIndicator;
         }
 
         protected virtual IDbConnection getDBConnection()
@@ -250,8 +259,8 @@ namespace SimpleDAO
                     }
                     tableSQL.Append(column);
                     colCount++;
-                    valueSQL.Append("@").Append(property);
-                    Utils.AddPropParamToCmd(cmd, property, propValue);
+                    valueSQL.Append(ParameterIndicator).Append(property);
+                    Utils.AddPropParamToCmd(cmd, property, propValue,ParameterIndicator);
                 }
             }
             tableSQL.Append(valueSQL).Append(")");
@@ -364,11 +373,11 @@ namespace SimpleDAO
                     whereSQL.Append(column);
                     if (propValue.ToString().Contains(WildcardChar))
                     {
-                        whereSQL.Append(" LIKE @");
+                        whereSQL.Append(" LIKE ").Append(ParameterIndicator);
                     }
                     else
                     {
-                        whereSQL.Append(" = @");
+                        whereSQL.Append(" = ").Append(ParameterIndicator);
                     }
                     whereSQL.Append(property);
                     whereProps.Add(property, propValue);
@@ -383,9 +392,9 @@ namespace SimpleDAO
                         {
                             updateSQL.Append(", ");
                         }
-                        updateSQL.Append(column).Append("=@").Append(property);
+                        updateSQL.Append(column).Append("=").Append(ParameterIndicator).Append(property);
                         colCount++;
-                        Utils.AddPropParamToCmd(cmd, property, propValue);
+                        Utils.AddPropParamToCmd(cmd, property, propValue,ParameterIndicator);
                     }
                 }
             }
@@ -393,7 +402,7 @@ namespace SimpleDAO
             updateSQL.Append(whereSQL);
             foreach (var whereProp in whereProps)
             {
-                Utils.AddPropParamToCmd(cmd, whereProp.Key, whereProp.Value);
+                Utils.AddPropParamToCmd(cmd, whereProp.Key, whereProp.Value,ParameterIndicator);
             }
             cmd.CommandType = CommandType.Text;
             cmd.CommandText = updateSQL.ToString();
@@ -452,15 +461,15 @@ namespace SimpleDAO
                     sql.Append(column);
                     if (propValue.ToString().Contains(WildcardChar))
                     {
-                        sql.Append(" LIKE @");
+                        sql.Append(" LIKE ").Append(ParameterIndicator);
                     }
                     else
                     {
-                        sql.Append(" = @");
+                        sql.Append(" = ").Append(ParameterIndicator);
                     }
                     sql.Append(property);
                     colCount++;
-                    Utils.AddPropParamToCmd(cmd, property, propValue);
+                    Utils.AddPropParamToCmd(cmd, property, propValue,ParameterIndicator);
                 }
 
             }
@@ -483,9 +492,9 @@ namespace SimpleDAO
                 string sql = dbTable;
                 // bind the variables
                 //todo: handle ORACLE or ?
-                while (  sql.Contains("@") )
+                while (  sql.Contains(ParameterIndicator) )
                 {
-                    int paramStart = sql.IndexOf("@") + 1;
+                    int paramStart = sql.IndexOf(ParameterIndicator) + 1;
                     int paramEnd = sql.IndexOf(" ", paramStart);
                     string param;
                     if (paramEnd > paramStart)
@@ -498,8 +507,8 @@ namespace SimpleDAO
                     }
                     PropertyInfo pInfo = obj.GetType().GetProperty(param);
                     if ( pInfo != null )
-                        Utils.AddPropParamToCmd(cmd, param, pInfo.GetValue(obj, null));
-                    sql = sql.Substring(sql.IndexOf( '@' + param) + param.Length + 1);
+                        Utils.AddPropParamToCmd(cmd, param, pInfo.GetValue(obj, null),ParameterIndicator);
+                    sql = sql.Substring(sql.IndexOf( ParameterIndicator + param) + param.Length + 1);
                     // figure out the parameter going backwards
                     /*
                     int charindex = sql.IndexOf("?") - 1;
@@ -573,14 +582,14 @@ namespace SimpleDAO
                             wb.Append(column);
                             if (propValue.ToString().Contains(WildcardChar))
                             {
-                                wb.Append(" LIKE @");
+                                wb.Append(" LIKE ").Append(ParameterIndicator);
                             }
                             else
                             {
-                                wb.Append(" = @");
+                                wb.Append(" = ").Append(ParameterIndicator);
                             }
                             wb.Append(property);
-                            Utils.AddPropParamToCmd(cmd, property, propValue);
+                            Utils.AddPropParamToCmd(cmd, property, propValue,ParameterIndicator);
                         }
                     }
                     /*

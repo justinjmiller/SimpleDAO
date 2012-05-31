@@ -62,10 +62,10 @@ namespace SimpleDAO
             return propertyName.ToString();
         }
 
-        public static void AddPropParamToCmd(IDbCommand cmd, string propName, object propValue)
+        public static void AddPropParamToCmd(IDbCommand cmd, string propName, object propValue, char ParameterIndicator)
         {
             IDataParameter param = cmd.CreateParameter();
-            param.ParameterName = "@" + propName;
+            param.ParameterName = ParameterIndicator + propName;
             param.Direction = ParameterDirection.Input;
             if (propValue == null)
             {
