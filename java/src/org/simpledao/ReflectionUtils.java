@@ -109,12 +109,37 @@ public class ReflectionUtils
         return props;
     }
 
+    /**
+     * Tries to determine the database table name via two methods:
+     * 1. A @Table type annotation on the class (e.g., @Table("LIBRARY_BOOKS")
+     *  *Note this annotation is marked inheritable so will be picked up
+     *  by subclasses
+     * 2. Converting the Class name to a table name via camel case rules
+     *  (e.g., a class named LibraryBooks will become LIRARY_BOOKS)
+     * **Inner classes that don't have an annotation in the class heirarchy
+     *   will be queried for their superclass and this method will recurse 
+     * @param bean - the object to inspect
+     * @return a database table name
+     */
     public static String inferBeanDBTableName( Object bean )
     {
         Annotation ta = bean.getClass().getAnnotation(Table.class);
         if ( ta != null && ta instanceof Table && !"".equals(((Table)ta).value()))
         {
             return ((Table)ta).value();
+        }
+        else if ( bean.getClass().getName().contains("$"))
+        {
+            // most likely an anonymous inner class, behave apprropriately
+            try
+            {
+                return inferBeanDBTableName( bean.getClass().getSuperclass().newInstance() );
+            }
+            catch (Exception e)
+            {
+                log.error("infer table name - unable to instantiate super class. " + e.getMessage(), e);
+                throw new RuntimeException("infer table name - unable to instantiate super class of inner class",e);
+            }
         }
         else
         {
