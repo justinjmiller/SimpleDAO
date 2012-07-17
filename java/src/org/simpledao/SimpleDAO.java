@@ -639,8 +639,8 @@ public class SimpleDAO<T>
     private PreparedStatement buildUpdateStatement( T bean, BeanDescriptor description, Connection con) throws SQLException
     {
         ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
-        StringBuffer sql = new StringBuffer( "UPDATE " );
-        StringBuffer whereSQL = new StringBuffer(" WHERE ");
+        StringBuilder sql = new StringBuilder( "UPDATE " );
+        StringBuilder whereSQL = new StringBuilder(" WHERE ");
         ArrayList<BoundVariable> keyBindVariables = new ArrayList<BoundVariable>();
 
         int columnCount = 0;
@@ -696,8 +696,8 @@ public class SimpleDAO<T>
             else
             {
                 Class type = pd.getPropertyType();
-                StringBuffer col = new StringBuffer();
-                if (columnCount > 0)
+                StringBuilder col = new StringBuilder();
+                if (columnCount > 0 || col.length() > 0)
                 {
                     col.append(", ");
                 }
@@ -712,16 +712,19 @@ public class SimpleDAO<T>
                     if ( def.isNullable() )
                     {
                         col.append("NULL");
-                        columnCount++;
+                        //todo: no need to increment count, it's not going to be a bound var
+                        //columnCount++;
                     }
                     else
+                    {
                         continue;
+                    }
 				}
                 else
                 {
                     col.append("?");
                     columnCount++;
-                bindVariables.add(new BoundVariable(columnCount, column, type, value));
+                    bindVariables.add(new BoundVariable(columnCount, column, type, value));
                 }
                 sql.append(col);
             }
