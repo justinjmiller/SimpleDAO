@@ -711,7 +711,7 @@ public class SimpleDAO<T>
 				{
                     if ( def.isNullable() )
                     {
-                        col.append("NULL");
+                        col.append(" NULL ");
                         //todo: no need to increment count, it's not going to be a bound var
                         //columnCount++;
                     }
