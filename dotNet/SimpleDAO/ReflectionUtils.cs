@@ -15,10 +15,15 @@ namespace SimpleDAO
             PropertyInfo[] props = obj.GetType().GetProperties();
             foreach (PropertyInfo prop in props)
             {
-                object[] attributes = prop.GetCustomAttributes(typeof(ColumnAttribute), false);
-                if (attributes.Length > 0)
+                object[] attributes = prop.GetCustomAttributes( false);
+                if (attributes.FirstOrDefault(x => x.GetType() == typeof(ExcludedPropertyAttribute)) != null) continue;
+
+                //if (attributes.Length > 0)
+                ColumnAttribute colAttr = attributes.FirstOrDefault(x => x.GetType() == typeof(ColumnAttribute)) as ColumnAttribute;
+                if ( colAttr != null)
                 {
-                    ColumnAttribute colAttr = attributes[0] as ColumnAttribute;
+                    //ColumnAttribute colAttr = attributes[0] as ColumnAttribute;
+                    //ColumnAttribute colAttr = attributes.Single(x => x.GetType() == typeof(ColumnAttribute)) as ColumnAttribute;
                     propMap.Add(prop.Name, colAttr.Name);
                 }
                 else

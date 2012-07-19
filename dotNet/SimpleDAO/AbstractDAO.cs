@@ -11,6 +11,7 @@ namespace SimpleDAO
         protected SimpleDAO<E> dao = new SimpleDAO<E>();
 
         protected abstract IDbConnection getDBConnection();
+
         public virtual List<E> GetList(E criteria)
         {
             using (IDbConnection con = getDBConnection())

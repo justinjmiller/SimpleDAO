@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="AbstractDAO.cs" />
     <Compile Include="Attributes\ColumnAttribute.cs" />
+    <Compile Include="Attributes\ExcludedPropertyAttribute.cs" />
     <Compile Include="Attributes\OrderByAttribute.cs" />
     <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
     <Compile Include="ObjectMap.cs" />
