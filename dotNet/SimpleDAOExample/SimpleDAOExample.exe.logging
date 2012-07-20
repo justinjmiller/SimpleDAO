@@ -1,0 +1,36 @@
+<log4net>
+  <!-- Define some output appenders -->
+  <appender name="RollingLogFileAppender" type="log4net.Appender.RollingFileAppender">
+    <file value="SimpleDAOExample.log" />
+    <appendToFile value="true" />
+    <maxSizeRollBackups value="10" />
+    <maximumFileSize value="1000000" />
+    <rollingStyle value="Size" />
+    <staticLogFileName value="true" />
+    <layout type="log4net.Layout.PatternLayout">
+      <!--
+        <header value="[Header]&#13;&#10;" />
+        <footer value="[Footer]&#13;&#10;" />
+        <conversionPattern value="%date [%thread] %-5level %logger [%ndc] - %message%newline" />
+        -->
+      <conversionPattern value="%date [%thread] %-5level %logger [%ndc] - %message%newline" />
+    </layout>
+  </appender>
+
+  <appender name="ConsoleAppender" type="log4net.Appender.ConsoleAppender">
+    <layout type="log4net.Layout.PatternLayout">
+      <conversionPattern value="%date [%thread] %-5level %logger [%ndc] &lt;%property{auth}&gt; - %message%newline" />
+    </layout>
+  </appender>
+  <!-- Setup the root category, add the appenders and set the default level -->
+  <root>
+    <level value="ALL" />
+    <appender-ref ref="RollingLogFileAppender" />
+    <appender-ref ref="ConsoleAppender" />
+  </root>
+  <logger name="DAO">
+    <level value="ALL" />
+    <appender-ref ref="RollingLogFileAppender" />
+    <appender-ref ref="ConsoleAppender" />
+  </logger>
+</log4net>
