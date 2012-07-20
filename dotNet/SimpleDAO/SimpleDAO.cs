@@ -37,8 +37,9 @@ namespace SimpleDAO
             NullIntValue = 0;
             NullStringValue = null;
             NullDateTimeValue = DateTime.MinValue;
-            WildcardChar = '@';
+            WildcardChar = '%';
             ParameterIndicator = ':';
+            //ParameterIndicator = '@';
         }
 
         public SimpleDAO(char parameterIndicator)
