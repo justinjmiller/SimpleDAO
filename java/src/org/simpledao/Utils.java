@@ -4,17 +4,15 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.simpledao.annotations.Column;
-import org.simpledao.annotations.Table;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Type;
-import java.text.ParseException;
-import java.util.*;
 import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
 import java.sql.*;
-import java.sql.Date;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
   * A set of utilties used by the SimpleDAO framework for introspection and column naming.
@@ -397,6 +395,11 @@ public class Utils
             {
 				if ( log.isDebugEnabled() ) { log.debug("bindVariables - found the key");}
                 bv.setPosition(boundVariables.size());
+            }
+
+            if ( bv.getValue() == null ) {
+                statement.setNull( bv.getPosition(), Types.VARCHAR );
+                continue;
             }
 
             if (bv.getType() == String.class)

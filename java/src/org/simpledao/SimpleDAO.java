@@ -644,7 +644,6 @@ public class SimpleDAO<T>
         ArrayList<BoundVariable> keyBindVariables = new ArrayList<BoundVariable>();
 
         int columnCount = 0;
-        int nullCount = 0;
         int keyCount = 0;
 
         sql.append( description.getTable()  );
@@ -698,7 +697,7 @@ public class SimpleDAO<T>
             {
                 Class type = pd.getPropertyType();
                 StringBuilder col = new StringBuilder();
-                if (columnCount > 0 || nullCount > 0)
+                if (columnCount > 0 )
                 {
                     col.append(", ");
                 }
@@ -712,8 +711,11 @@ public class SimpleDAO<T>
 				{
                     if ( def.isNullable() )
                     {
-                        col.append(" NULL ");
-                        nullCount++;
+//                        col.append("NULL");
+                        //columnCount++;
+                        col.append("?");
+                        columnCount++;
+                        bindVariables.add(new BoundVariable(columnCount, column, type, null));
                     }
                     else
                     {
