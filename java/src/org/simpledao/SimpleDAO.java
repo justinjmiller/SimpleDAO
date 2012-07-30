@@ -253,7 +253,7 @@ public class SimpleDAO<T>
 
                 // create the return bean
                 //Type pt = bean.getClass().getGenericSuperclass();
-                T newBean = null;
+                T newBean;
                 try
                 {
                     newBean = (T)bean.getClass().newInstance();
@@ -418,8 +418,8 @@ public class SimpleDAO<T>
     private PreparedStatement buildInsertStatement(T bean, BeanDescriptor description, Connection con ) throws SQLException
     {
         ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
-        StringBuffer sql = new StringBuffer("INSERT INTO " );
-        StringBuffer valuesSQL = new StringBuffer(" ) VALUES ( ");
+        StringBuilder sql = new StringBuilder("INSERT INTO " );
+        StringBuilder valuesSQL = new StringBuilder(" ) VALUES ( ");
         int propCount = 0;
 
         sql.append( description.getTable() );
@@ -434,8 +434,8 @@ public class SimpleDAO<T>
                 column = Utils.getPropertyDBName(property);
             }
 
-            PropertyDescriptor pd = null;
-            Object value = null;
+            PropertyDescriptor pd;
+            Object value;
             try
             {
                 pd = PropertyUtils.getPropertyDescriptor( bean, property);
@@ -487,7 +487,7 @@ public class SimpleDAO<T>
 
     private PreparedStatement buildSelectStatement( T bean, BeanDescriptor descriptor, Connection con) throws SQLException
     {
-        String sql= "";
+        String sql;
 
         ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
 /*
@@ -502,7 +502,7 @@ public class SimpleDAO<T>
             String loopsql = descriptor.getTable();
 //            String loopsql = getBeanDBTableName(bean);
             int paramCount = 0;
-            while ( loopsql.indexOf("@") > -1)
+            while (loopsql.contains("@"))
             {
                 String param;
                 int paramStart = loopsql.indexOf("@") + 1;
@@ -515,8 +515,8 @@ public class SimpleDAO<T>
                 {
                     param = loopsql.substring(paramStart);
                 }
-                PropertyDescriptor pd = null;
-                Object value = null;
+                PropertyDescriptor pd;
+                Object value;
                 try
                 {
                     pd = PropertyUtils.getPropertyDescriptor( bean, param);
@@ -537,9 +537,9 @@ public class SimpleDAO<T>
         else
         {
 
-            StringBuffer selectSQL = new StringBuffer( "SELECT ");
-            StringBuffer whereSQL = new StringBuffer(" FROM " );
-            StringBuffer orderSQL = new StringBuffer("");
+            StringBuilder selectSQL = new StringBuilder( "SELECT ");
+            StringBuilder whereSQL = new StringBuilder(" FROM " );
+            StringBuilder orderSQL = new StringBuilder("");
 
             whereSQL.append( descriptor.getTable() );
 //            whereSQL.append( getBeanDBTableName(bean) );
@@ -550,17 +550,20 @@ public class SimpleDAO<T>
             int whereCount = 0;
 //            int orderCount = 0;
 
-            for (String property : descriptor.getPropertyMap().keySet())
+//            for (String property : descriptor.getPropertyMap().keySet())
+            for (Map.Entry<String,ColumnDefinition> ent: descriptor.getPropertyMap().entrySet())
 //            while ( iter.hasNext() )
             {
+                String property = ent.getKey();
 //                String property = (String) iter.next();
-                String column = descriptor.getPropertyMap().get(property).getName();
+                //String column = descriptor.getPropertyMap().get(property).getName();
+                String column = ent.getValue().getName();
 //                String column = props.get(property);
 
                 if ( log.isDebugEnabled()) { log.debug("buildSelectStatement - get property '" + property + "' for column '" + column + "'");}
                 
-                PropertyDescriptor pd = null;
-                Object value = null;
+                PropertyDescriptor pd;
+                Object value;
                 try
                 {
                     pd = PropertyUtils.getPropertyDescriptor( bean, property );
@@ -583,9 +586,15 @@ public class SimpleDAO<T>
                 if ( Utils.isPropertyNull( type, value ) )
                 {
                     //continue;
+                    if ( ent.getValue().isNullable() )
+                    {
+                        whereSQL.append(whereCount > 0 || whereSQL.toString().contains("WHERE") ? " AND " : " WHERE " )
+                            .append(column).append( " IS NULL ");
+                    }
                 }
                 else
                 {
+/*
                     if ( whereCount == 0 )
                     {
                         whereSQL.append( " WHERE " );
@@ -595,7 +604,7 @@ public class SimpleDAO<T>
                         whereSQL.append(" AND " );
                     }
                     whereSQL.append( column );
-                    if ( value.toString().indexOf("%") > -1 )
+                    if (value.toString().contains("%"))
                     {
                         whereSQL.append( " LIKE ? " );
                     }
@@ -603,6 +612,9 @@ public class SimpleDAO<T>
                     {
                         whereSQL.append( " = ? " );
                     }
+*/
+                    whereSQL.append(whereCount > 0 || whereSQL.toString().contains("WHERE") ? " AND " : " WHERE " )
+                        .append(column).append( value.toString().contains("%") ? " LIKE ? " : " = ? ");
                     whereCount ++;
                     bindVariables.add( new BoundVariable( whereCount, column, type, value));
                 }
@@ -663,8 +675,8 @@ public class SimpleDAO<T>
 //            PropertyDescriptor pd = PropertyUtils.getPropertyDescriptor(bean, property);
 //            Object value = PropertyUtils.getProperty(bean, property);
 
-            PropertyDescriptor pd = null;
-            Object value = null;
+            PropertyDescriptor pd;
+            Object value;
             try
             {
                 pd = PropertyUtils.getPropertyDescriptor( bean, property );
@@ -752,7 +764,7 @@ public class SimpleDAO<T>
     private PreparedStatement buildDeleteStatement( T bean, BeanDescriptor description,Connection con ) throws SQLException
     {
         ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
-        StringBuffer sql = new StringBuffer( "DELETE ");
+        StringBuilder sql = new StringBuilder( "DELETE ");
 
         sql.append( description.getTable() );
         sql.append( " WHERE " );
@@ -773,8 +785,8 @@ public class SimpleDAO<T>
 //            }
 //            PropertyDescriptor pd = PropertyUtils.getPropertyDescriptor( bean, property );
 //            Object value = PropertyUtils.getProperty ( bean, property );
-            PropertyDescriptor pd = null;
-            Object value = null;
+            PropertyDescriptor pd;
+            Object value;
             try
             {
                 pd = PropertyUtils.getPropertyDescriptor( bean, property );
