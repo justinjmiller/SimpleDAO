@@ -582,11 +582,23 @@ public class SimpleDAO<T>
                 //todo: deal with nullable properties
                 if ( Utils.isPropertyNull( type, value ) )
                 {
-                    //continue;
+                    ColumnDefinition def = descriptor.getPropertyMap().get(property);
+                    if (def.isNullable()) {
+                        if ( !whereSQL.toString().contains("WHERE"))
+                        {
+                            whereSQL.append( " WHERE " );
+                        }
+                        else
+                        {
+                            whereSQL.append(" AND " );
+                        }
+                        whereSQL.append(column);
+                        whereSQL.append(" is null ");
+                    }
                 }
                 else
                 {
-                    if ( whereCount == 0 )
+                    if ( !whereSQL.toString().contains("WHERE") )
                     {
                         whereSQL.append( " WHERE " );
                     }
