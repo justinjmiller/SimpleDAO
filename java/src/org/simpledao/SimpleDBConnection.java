@@ -1,16 +1,16 @@
 package org.simpledao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -23,7 +23,7 @@ import java.util.Properties;
 public class SimpleDBConnection
 {
     //*****************************************************Instance Variables
-    private static Log log = LogFactory.getLog( SimpleDBConnection.class ) ;
+    private static Logger log = LoggerFactory.getLogger(SimpleDBConnection.class) ;
 
     //private String JNDI_DSNAME_PREFIX = "java:comp/env/jdbc/";
     private static String DEFAULT_PROP_FILE = "database.properties";
@@ -153,7 +153,7 @@ public class SimpleDBConnection
 
     /**
      *
-     * @return
+     * @return Connection
      * @throws java.sql.SQLException
      */
     public Connection getDBConnection() throws SQLException
@@ -202,7 +202,7 @@ public class SimpleDBConnection
         }
         catch (NamingException ne)
         {
-            log.error(ne);
+            log.error("The JNDI Datasource named '" + jndiDSName + "' was not found", ne);
             throw new RuntimeException("The JNDI Datasource name specified '" + jndiDSName + "' was not found");
         }
 
@@ -226,7 +226,7 @@ public class SimpleDBConnection
             }
             else
             {
-                log.error(e);
+                log.error("Unable to load the properties file '" + propFile + "'", e);
                 throw new RuntimeException("Unable to load the properties file '" + propFile + "'");
             }
         }
@@ -262,7 +262,7 @@ public class SimpleDBConnection
         }
         catch (ClassNotFoundException e)
         {
-            log.error(e);
+            log.error("Unable to load teh database driver '" + databaseDriver + "'", e);
             throw new RuntimeException("Unable to load the database driver specified '" + databaseDriver + "'");
         }
 

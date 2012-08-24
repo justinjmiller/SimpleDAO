@@ -2,13 +2,13 @@ package org.simpledao;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.simpledao.annotations.ExcludedProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.beans.PropertyDescriptor;
 import java.util.HashMap;
 import java.util.Map;
-import java.beans.PropertyDescriptor;
 
 /**
  * <p>SimpleBean is an abstract class intended to be extended by
@@ -27,7 +27,7 @@ import java.beans.PropertyDescriptor;
  */
 public abstract class SimpleBean
 {
-    private static final Log log = LogFactory.getLog( SimpleBean.class );
+    private static final Logger log = LoggerFactory.getLogger(SimpleBean.class);
 
     /**
      * The table used in the statements sent to the database.  uses class name by default.
@@ -210,7 +210,7 @@ public abstract class SimpleBean
 		for (PropertyDescriptor descriptor : descriptors)
 		{
 			String property = descriptor.getName();
-			if (!"class".equals(property) && property.indexOf("DB") < 0)
+			if (!"class".equals(property) && !property.contains("DB"))
 			{
                 try
                 {
@@ -218,7 +218,7 @@ public abstract class SimpleBean
                 }
                 catch (Exception e)
                 {
-                    log.error(e);
+                    log.error("Unable to set property '" + property + "'",e);
                 }
             }
 		}
@@ -305,7 +305,6 @@ public abstract class SimpleBean
 
     /**
      * Set null all the public properties in the bean
-     * @throws Exception please just catch this exception
      */
     public void reset()
     {
@@ -316,18 +315,21 @@ public abstract class SimpleBean
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error("Unable to get propes", e);
         }
-        for (Object o : props.keySet())
+        if (props != null)
         {
-            String propName = (String) o;
-            try
+            for (Object o : props.keySet())
             {
-                BeanUtils.setProperty(this, propName, null);
-            }
-            catch (Exception e)
-            {
-                log.error(e);
+                String propName = (String) o;
+                try
+                {
+                    BeanUtils.setProperty(this, propName, null);
+                }
+                catch (Exception e)
+                {
+                    log.error("Unable to set prop '" + propName + "'",e);
+                }
             }
         }
     }

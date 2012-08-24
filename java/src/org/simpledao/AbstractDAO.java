@@ -1,7 +1,8 @@
 package org.simpledao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -15,7 +16,7 @@ import java.util.List;
  */
 public abstract class AbstractDAO<T>
 {
-    private static final Log log = LogFactory.getLog( AbstractDAO.class );
+    private static final Logger log = LoggerFactory.getLogger(AbstractDAO.class);
 
     protected SimpleDAO<T> dao = new SimpleDAO<T>();
 
@@ -39,7 +40,8 @@ public abstract class AbstractDAO<T>
 
     public List<T> getList(T criteria)  throws SQLException
     {
-        if ( log.isDebugEnabled()) { log.debug("GetList('" + criteria.getClass().getName() + "') - begin");}
+//        if ( log.isDebugEnabled()) { log.debug("GetList('" + criteria.getClass().getName() + "') - begin");}
+        log.debug("GetList('{}' - begin", criteria.getClass().getName() );
         Connection con = null;
         try
         {

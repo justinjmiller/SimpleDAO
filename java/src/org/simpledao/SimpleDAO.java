@@ -1,8 +1,8 @@
 package org.simpledao;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyDescriptor;
 import java.io.BufferedInputStream;
@@ -23,8 +23,8 @@ import java.util.Map;
 //todo: handle clob in insert
 public class SimpleDAO<T>
 {
-    private static final Log log = LogFactory.getLog( SimpleDAO.class );
-    private static final Log sqlLog = LogFactory.getLog( "SQL" );
+    private static final Logger log = LoggerFactory.getLogger( SimpleDAO.class );
+    private static final Logger sqlLog = LoggerFactory.getLogger("SQL");
 
     public void simpleInsert( T bean ) throws SQLException
     {
@@ -218,7 +218,7 @@ public class SimpleDAO<T>
                             }
                             catch (IOException e)
                             {
-                                log.error(e);
+                                log.error("Unable to write BLOB", e);
                                 throw new RuntimeException("Unable to read the blob from the database",e);
                             }
                             //props.put( Utils.getCamelCaseColumnName( metaData.getColumnName(i) ), baos.toByteArray() );
@@ -260,7 +260,7 @@ public class SimpleDAO<T>
                 }
                 catch (Exception e)
                 {
-                    log.error(e);
+                    log.error("Unable to create new bean", e);
                     throw new RuntimeException("Unable to instantiate the new Object",e);
                 }
                 //T newBean = (T)((Class)pt).newInstance();
@@ -443,7 +443,7 @@ public class SimpleDAO<T>
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error("Unable to find bean property named '" + property + "'",e);
                 throw new RuntimeException("Unable to get the bean property named '" + property + "'",e);
             }
 
@@ -524,7 +524,7 @@ public class SimpleDAO<T>
                 }
                 catch (Exception e)
                 {
-                    log.error(e);
+                    log.error("Unable to get bean property named '"+ param + "'",e);
                     throw new RuntimeException("Unable to get the bean property named '" + param + "'",e);
                 }
                 paramCount ++;

@@ -1,13 +1,14 @@
 package org.simpledao.lookuplist;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
-import java.sql.Statement;
-import java.sql.ResultSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 
 /**
  * <p/>
@@ -19,8 +20,8 @@ import java.sql.SQLException;
 public class LookupListDAO
 {
     // ----------------------------------------------------- Instance Variables
-    protected static Log log = LogFactory.getLog(LookupListDAO.class);
-    protected static Log sqlLog = LogFactory.getLog("SQL");
+    protected static Logger log = LoggerFactory.getLogger(LookupListDAO.class);
+    protected static Logger sqlLog = LoggerFactory.getLogger("SQL");
 
     private static final String SELECT_LIST_SQL =
             "SELECT #TABLE#_ID AS ID, DESCRIPTION " +

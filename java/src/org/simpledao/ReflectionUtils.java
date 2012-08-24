@@ -3,9 +3,9 @@ package org.simpledao;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.beanutils.locale.LocaleBeanUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.simpledao.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
@@ -21,7 +21,7 @@ import java.util.*;
  */
 public class ReflectionUtils
 {
-    private static final Log log = LogFactory.getLog( ReflectionUtils.class );
+    private static final Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
 
     public static BeanDescriptor describeBean( Object bean)
     {
@@ -40,7 +40,7 @@ public class ReflectionUtils
                     }
                     catch (Exception e)
                     {
-                        log.error(e);
+                        log.error("Unable to get property '" + prop.getName() + "'", e);
                     }
                 }
             }

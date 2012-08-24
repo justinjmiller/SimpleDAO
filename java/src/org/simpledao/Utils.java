@@ -1,9 +1,9 @@
 package org.simpledao;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.simpledao.annotations.Column;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
@@ -27,7 +27,7 @@ import java.util.Map;
 public class Utils
 {
 
-	private static final Log log = LogFactory.getLog( Utils.class );
+	private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
     /**
      * Default constructor
@@ -77,8 +77,8 @@ public class Utils
 
     /**
      *
-     * @param bean
-     * @return
+     * @param bean to use
+     * @return a map of properties
      * @deprecated Use ReflectionUtils.getBeanPropertyMap instead
      */
     public static Map<String,String> getBeanPropertyMap(Object bean)
@@ -95,7 +95,7 @@ public class Utils
             }
             else
             {
-                if (!"class".equals(property) && property.indexOf("DB") < 0)
+                if (!"class".equals(property) && !property.contains("DB"))
                 {
                     props.put(property, Utils.getPropertyDBName(property));
                 }
@@ -115,7 +115,7 @@ public class Utils
      */
     public static String getCamelCaseColumnName( String columnName )
     {
-        StringBuffer camelCaseColumnName = new StringBuffer();
+        StringBuilder camelCaseColumnName = new StringBuilder();
 
         if ( columnName.indexOf( "_" ) > 0 )
         {
@@ -150,7 +150,7 @@ public class Utils
      */
     public static String getPropertyDBName( String property )
     {
-        StringBuffer dbColumnName = new StringBuffer();
+        StringBuilder dbColumnName = new StringBuilder();
         char[] chars = property.toCharArray();
         for ( int i = 0; i < property.length(); i++ )
         {
