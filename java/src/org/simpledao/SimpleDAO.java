@@ -645,6 +645,8 @@ public class SimpleDAO<T>
         Utils.bindVariables(stmt, bindVariables);
         return stmt;
 */
+        if ( sqlLog.isDebugEnabled() ) { sqlLog.debug("buildSelectStatement SQL:" + sql); }
+
         return Utils.prepareStatement(con, sql, bindVariables);
     }
 
