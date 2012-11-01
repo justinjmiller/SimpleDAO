@@ -18,5 +18,5 @@ import java.lang.annotation.Target;
 public @interface OrderedColumn
 {
     SortOrder sortOrder() default SortOrder.ASCENDING;
-    int orderPosition() default 0;
+    int orderPosition() default 1;
 }

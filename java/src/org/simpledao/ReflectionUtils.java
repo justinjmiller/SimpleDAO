@@ -181,9 +181,9 @@ public class ReflectionUtils
         return keys.toArray(new String[keys.size()]);
     }
 
-    public static HashMap<Integer, SortedColumn> getBeanDBOrderBy( Object bean )
+    public static Map<Integer, SortedColumn> getBeanDBOrderBy( Object bean )
     {
-        HashMap<Integer, SortedColumn> sorts = new HashMap<Integer,SortedColumn>();
+        Map<Integer, SortedColumn> sorts = new HashMap<Integer,SortedColumn>();
         PropertyDescriptor descriptors[] = PropertyUtils.getPropertyDescriptors( bean );
         for (PropertyDescriptor descriptor : descriptors)
         {
@@ -194,21 +194,27 @@ public class ReflectionUtils
             {
                 SortedColumn column = new SortedColumn();
                 column.setName(Utils.getPropertyDBName(property));
-                int position = 0;
+                int position = 1;
+
                 if ( ca != null )
                 {
                     if ( !"".equals(ca.value())) column.setName( ca.value());
                     if ( ca.sortOrder() != SortOrder.UNDEFINED ) column.setSortOrder( ca.sortOrder());
                     position =  ca.orderByPosition();
                 }
+
                 if ( oca != null && oca.sortOrder() != SortOrder.UNDEFINED)
                 {
                     column.setSortOrder(oca.sortOrder());
                     position =oca.orderPosition();
                 }
-                if ( position == sorts.size() )
-                    throw new RuntimeException("Cannot have multiple properties with the same sort position");
-                if ( position == 0 ) position = sorts.size() + 1;
+
+               //if ( position == sorts.size() )
+                if ( position == 0 || sorts.containsKey(position) )
+                    throw new RuntimeException("Order Position must be > 0 and unique");
+
+                //if ( position == 0 ) position = sorts.size() + 1;
+
                 sorts.put(position, column);
             }
         }

@@ -621,12 +621,13 @@ public class SimpleDAO<T>
 
             }
 
-            if ( descriptor.getOrderedColumns() != null && descriptor.getOrderedColumns().size() > 0 )
+            Map<Integer, SortedColumn> sorts = descriptor.getOrderedColumns();
+            if ( sorts != null && sorts.size() > 0 )
             {
                 //todo: this might need to look at the property<->column map to make sure this column is included
-                for ( int i = 1; i <= descriptor.getOrderedColumns().size(); i ++ )
+                for ( int i = 1; i <= sorts.size(); i ++ )
                 {
-                    SortedColumn sc = descriptor.getOrderedColumns().get(i);
+                    SortedColumn sc = sorts.get(i);
                     if ( i == 1 )
                         orderSQL.append(" ORDER BY ");
                     else

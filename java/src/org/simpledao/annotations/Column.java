@@ -22,5 +22,5 @@ public @interface Column
     String defaultValue() default "-1";
     boolean updateKey() default false;
     SortOrder sortOrder() default SortOrder.UNDEFINED;
-    int orderByPosition() default 0; 
+    int orderByPosition() default 1;
 }
