@@ -237,9 +237,18 @@ public class ReflectionUtils
 
             if (propName == null)
             {
+                log.debug("somehow we managed to come to a null property name, weird");
                 continue;
             }
+
             Object value = props.get(propName);
+            if ( value == null )
+            {
+                if ( log.isDebugEnabled() ) { log.debug("populate - property '" + propName + "' - null property value not set");}
+                continue;
+            }
+
+
             // turn date into displayable date
 
 /*
