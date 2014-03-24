@@ -11,6 +11,7 @@ public class ColumnDefinition
     private String name;
     private boolean updateKey;
     private boolean nullable;
+    private String nullValue;
     private SortOrder sortOrder;
     private int orderByPosition;
     private Object value;
@@ -52,6 +53,14 @@ public class ColumnDefinition
     public void setNullable(boolean nullable)
     {
         this.nullable = nullable;
+    }
+
+    public String getNullValue() {
+        return nullValue;
+    }
+
+    public void setNullValue(String nullValue) {
+        this.nullValue = nullValue;
     }
 
     public SortOrder getSortOrder()

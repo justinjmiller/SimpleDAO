@@ -16,5 +16,5 @@ import java.lang.annotation.Target;
 public @interface NullableProperty
 {
     boolean value() default true;
-    String nullValue() default "-1";
+    String nullValue() default "";
 }

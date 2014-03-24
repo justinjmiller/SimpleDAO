@@ -76,7 +76,9 @@ public class ReflectionUtils
                     if (!"".equals(ca.value()))
                         column.setName( ca.value());
                     column.setNullable( ca.nullable());
+                    column.setNullValue( ca.nullValue());
                     column.setUpdateKey( ca.updateKey());
+
                     if ( ca.sortOrder() != SortOrder.UNDEFINED)
                     {
                         column.setSortOrder( ca.sortOrder());
@@ -86,7 +88,10 @@ public class ReflectionUtils
                 if (ukc != null )
                     column.setUpdateKey(true);
                 if ( np != null )
-                        column.setNullable( np.value());
+                {
+                    column.setNullable( np.value());
+                    column.setNullValue(np.nullValue());
+                }
                 if ( oc != null )
                 {
                     column.setSortOrder( oc.sortOrder());

@@ -19,6 +19,7 @@ public @interface Column
 {
     String value() default "";
     boolean nullable() default false;
+    String nullValue() default "";
     String defaultValue() default "-1";
     boolean updateKey() default false;
     SortOrder sortOrder() default SortOrder.UNDEFINED;

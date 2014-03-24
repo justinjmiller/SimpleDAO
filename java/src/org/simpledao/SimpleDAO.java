@@ -582,17 +582,17 @@ public class SimpleDAO<T>
                 selectSQL.append( column );
                 colCount++;
 
-                //todo: deal with nullable properties
-                if ( Utils.isPropertyNull( type, value ) )
-                {
+
+                //if ( Utils.isPropertyNull( type, value ) )                                                               n
+                //{
                     //continue;
-                    if ( ent.getValue().isNullable() )
+                    if ( ent.getValue().isNullable()  &&  Utils.isPropertyNull(type, value, ent.getValue().getNullValue()))
                     {
                         whereSQL.append(whereCount > 0 || whereSQL.toString().contains("WHERE") ? " AND " : " WHERE " )
                             .append(column).append( " IS NULL ");
                     }
-                }
-                else
+                //}
+                else if ( !Utils.isPropertyNull( type, value ) )
                 {
 /*
                     if ( whereCount == 0 )
@@ -719,13 +719,11 @@ public class SimpleDAO<T>
                 col.append(column);
                 col.append(" = ");
 
-//				if (value == null ||
-//				  (type == Integer.class || "int".equals(type.getName())) && ((Integer) value < 0) ||
-//				  ( type == Double.class || "double".equals( type.getName() ) ) && ((Double) value < 0.0d))
                 if ( Utils.isPropertyNull( type, value) )
 				{
                     if ( def.isNullable() )
                     {
+                        log.debug("set {0} to NULL",column);
 //                        col.append("NULL");
                         //columnCount++;
                         col.append("?");

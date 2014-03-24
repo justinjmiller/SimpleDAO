@@ -1,0 +1,4 @@
+2.5
+---
+added nullValue to Column and Nullable Annotations to allow for SELECT * FROM TABLE WHERE COLUMN IS NULL
+
