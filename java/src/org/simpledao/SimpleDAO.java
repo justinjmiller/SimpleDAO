@@ -561,7 +561,7 @@ public class SimpleDAO<T>
 //                String column = props.get(property);
 
                 if ( log.isDebugEnabled()) { log.debug("buildSelectStatement - get property '" + property + "' for column '" + column + "'");}
-                
+
                 PropertyDescriptor pd;
                 Object value;
                 try
@@ -765,7 +765,7 @@ public class SimpleDAO<T>
     private PreparedStatement buildDeleteStatement( T bean, BeanDescriptor description,Connection con ) throws SQLException
     {
         ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
-        StringBuilder sql = new StringBuilder( "DELETE ");
+        StringBuilder sql = new StringBuilder( "DELETE FROM ");
 
         sql.append( description.getTable() );
         sql.append( " WHERE " );
