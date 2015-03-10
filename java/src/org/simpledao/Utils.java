@@ -202,24 +202,48 @@ public class Utils
 
     public static boolean isPropertyNull( Class type, Object value, String nullValue )
     {
+        // handle just nulls
+        if (value == null && nullValue == null )
+        {
+            return true;
+        }
+
+/*
+        if ( type == String.class )
+        {
+            return (nullValue == null && value == null ) || nullValue.equals(value);
+        }
+*/
+
+
         try
         {
             if  ( ( type == Integer.class || "int".equals(type.getName()) ) &&
                     (Integer)value == Integer.parseInt(nullValue) )
+            {
+                if ( value.getClass() != Integer.class &&
+                        !"int".equals(value.getClass().getName()))
                 return true;
+            }
 
             if  ( ( type == Long.class || "long".equals( type.getName() ) ) &&
                     (Long)value == Long.parseLong(nullValue) )
+            {
                 return true;
+            }
 
             if ( (type == Double.class || "double".equals( type.getName() )) &&
                     (Double)value == Double.parseDouble(nullValue) )
+            {
                 return true;
+            }
 
 
             if (( type==Float.class || "float".equals(type.getName() )) &&
                     (Float)value == Float.parseFloat(nullValue ))
+            {
                 return true;
+            }
 
             if ( value instanceof java.util.Date )
             {

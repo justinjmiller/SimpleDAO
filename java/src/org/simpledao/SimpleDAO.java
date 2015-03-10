@@ -200,31 +200,43 @@ public class SimpleDAO<T>
                     {
                         if ( metaData.getColumnType(i) == Types.BLOB )
                         {
-                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + " is a BLOB");}
+                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a BLOB");}
 
                             Blob blob = rs.getBlob( metaData.getColumnName(i) );
 
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-                            BufferedInputStream bis = new BufferedInputStream( blob.getBinaryStream() );
-
-                            byte[] buffer = new byte[1024];
-                            int curByte;
-                            try
+                            if ( blob != null )
                             {
-                                while ( ( curByte = bis.read( buffer, 0, buffer.length ) ) != -1 )
+                                if (log.isDebugEnabled())
                                 {
-                                    baos.write( buffer, 0, curByte );
+                                    log.debug("simpleSelectList - column # '" + i + "' BLOB is not null, write it to bean");
                                 }
-                            }
-                            catch (IOException e)
-                            {
-                                log.error("Unable to write BLOB", e);
-                                throw new RuntimeException("Unable to read the blob from the database",e);
-                            }
-                            //props.put( Utils.getCamelCaseColumnName( metaData.getColumnName(i) ), baos.toByteArray() );
-                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - write BLOB to bean'" );}
+                                ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+                                BufferedInputStream bis = new BufferedInputStream(blob.getBinaryStream());
 
-                            props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getString(i) );
+                                byte[] buffer = new byte[1024];
+                                int curByte;
+                                try
+                                {
+                                    while ((curByte = bis.read(buffer, 0, buffer.length)) != -1)
+                                    {
+                                        baos.write(buffer, 0, curByte);
+                                    }
+                                } catch (IOException e)
+                                {
+                                    log.error("Unable to write BLOB", e);
+                                    throw new RuntimeException("Unable to read the blob from the database", e);
+                                }
+                                props.put( Utils.getCamelCaseColumnName( metaData.getColumnName(i) ), baos.toByteArray() );
+                            }
+                        }
+                        else if  ( metaData.getColumnType(i) == Types.CLOB )
+                        {
+                            if (log.isDebugEnabled())
+                            {
+                                log.debug("simpleSelectList - write CLOB to bean'");
+                            }
+                            props.put(columnPropertyMap.get(metaData.getColumnName(i)), rs.getString(i));
+
                         }
                         else if ( metaData.getColumnType(i) == Types.DATE )
                         {
@@ -561,7 +573,7 @@ public class SimpleDAO<T>
 //                String column = props.get(property);
 
                 if ( log.isDebugEnabled()) { log.debug("buildSelectStatement - get property '" + property + "' for column '" + column + "'");}
-
+                
                 PropertyDescriptor pd;
                 Object value;
                 try
@@ -765,7 +777,7 @@ public class SimpleDAO<T>
     private PreparedStatement buildDeleteStatement( T bean, BeanDescriptor description,Connection con ) throws SQLException
     {
         ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
-        StringBuilder sql = new StringBuilder( "DELETE FROM ");
+        StringBuilder sql = new StringBuilder( "DELETE ");
 
         sql.append( description.getTable() );
         sql.append( " WHERE " );
