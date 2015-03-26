@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyDescriptor;
+import java.io.ByteArrayInputStream;
 import java.lang.annotation.Annotation;
 import java.sql.*;
 import java.sql.Date;
@@ -480,7 +481,7 @@ public class Utils
             }
 
             if ( bv.getValue() == null ) {
-                statement.setNull( bv.getPosition(), Types.VARCHAR );
+                statement.setNull( bv.getPosition(), Types.NULL ); // changed from Types.VARCHAR - 20150310
                 continue;
             }
 
@@ -549,6 +550,11 @@ public class Utils
 				if ( log.isDebugEnabled() ) { log.debug("bindVariables - var '" + bv.getName() + "' is float");}
 				statement.setFloat(bv.getPosition(), Float.parseFloat(bv.getValue().toString()));
 			}
+            else if ( bv.getType() == byte[].class) // BLOB
+            {
+                if ( log.isDebugEnabled() ) { log.debug("bindVariables - var '" + bv.getName() + "' is a byte array - assume blob");}
+                statement.setBlob(bv.getPosition(), new ByteArrayInputStream((byte[])bv.getValue()));
+            }
             else if ("char".equals(bv.getType().getName()))
             {
 				if ( log.isDebugEnabled() ) { log.debug("bindVariables - var '" + bv.getName() + "' is char");}
@@ -556,7 +562,8 @@ public class Utils
             }
 			else if ( bv.getValue() instanceof java.util.Date )
             {
-				if ( log.isDebugEnabled() ) { log.debug("bindVariables - var '" + bv.getName() + "' is Date");}
+				if ( log.isDebugEnabled() ) { log.debug("bindVariables - var '" + bv.getName() + "' is Date");
+                }
                 statement.setTimestamp(bv.getPosition(), new java.sql.Timestamp(((java.util.Date)bv.getValue()).getTime()));
 
 /*

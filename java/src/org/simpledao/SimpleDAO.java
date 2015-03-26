@@ -186,7 +186,6 @@ public class SimpleDAO<T>
             PreparedStatement ps = buildSelectStatement( bean, descriptor, con );
             ResultSet rs = ps.executeQuery();
 
-			HashMap<String,Object> props = new HashMap<String,Object>();
 
             ResultSetMetaData metaData = rs.getMetaData();
 
@@ -194,6 +193,7 @@ public class SimpleDAO<T>
 
             while ( rs.next() )
             {
+                HashMap<String,Object> props = new HashMap<String,Object>();
                 for ( int i = 1; i <= columnCount ; i++)
                 {
                     if ( columnPropertyMap.containsKey(metaData.getColumnName((i))))
