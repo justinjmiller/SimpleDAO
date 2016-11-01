@@ -149,7 +149,7 @@ namespace SimpleDAO
         public virtual void Update(IDbConnection con)
         {
             SimpleDAO<SimpleObject> dao = new SimpleDAO<SimpleObject>();
-            dao.SimpleDelete(con, this);
+            dao.SimpleUpdate(con, this);
         }
 
         public virtual void Delete(IDbConnection con)
