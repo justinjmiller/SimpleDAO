@@ -646,7 +646,7 @@ namespace SimpleDAO
             return cmd;
         }
 
-        //private bool isValueNull(object value, string propTypeName)
+
         private bool isPropertyNull(PropertyInfo pInfo, object value)
         {
             string propTypeName = pInfo.PropertyType.Name;
@@ -659,39 +659,19 @@ namespace SimpleDAO
             }
 
             //todo: use the nullValue attribute
-
-            //Type propType = value.GetType();
-            //string propTypeName = propType.Name;
-            if ( propTypeName.Equals("Int32"))
-            {
-                if ((int)value == NullIntValue )
-                    return true;
-            }
-            else if (propTypeName.Equals("String"))
-            {
-                if ((string)value == NullStringValue)
-                    return true;
-            }
-            else if (propTypeName.Equals("DateTime"))
-            {
-                if ((DateTime)value == NullDateTimeValue)
-                    return true;
-            }
-            else if (propTypeName.Equals("Single"))
-            {
-                if ((Single)value == NullIntValue)
-                    return true;
-            }
-            else if (propTypeName.Equals("Double"))
-            {
-                if ((Double)value == NullIntValue)
-                    return true;
-            }
-            else if (propTypeName.Equals("Nullable`1"))
-            {
-                return value == null;
-            }
-            return false;
+			switch (propTypeName)
+			{
+				case "Int32":
+				case "Single":
+				case "Double":
+					return (Double)value == NullIntValue;
+				case "String":
+					return (string)value == NullStringValue;
+				case "DateTime":
+					return (DateTime)value == NullDateTimeValue;
+				default:
+					return value == null;
+			}
         }
 
         private bool isColumnKey(string[] columns, string column)
