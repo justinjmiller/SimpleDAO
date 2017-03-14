@@ -486,7 +486,6 @@ namespace SimpleDAO
         {
             IDbCommand cmd = con.CreateCommand();
             cmd.CommandType = CommandType.Text;
-            //Regex sqlRegEx = new Regex("SELECT.+FROM");
             String dbTable = getDBTable(obj);
             if (dbTable.ToUpper().Contains("SELECT ") && dbTable.ToUpper().Contains("FROM "))
             {
@@ -510,24 +509,6 @@ namespace SimpleDAO
                     if ( pInfo != null )
                         Utils.AddPropParamToCmd(cmd, param, pInfo.GetValue(obj, null),ParameterIndicator);
                     sql = sql.Substring(sql.IndexOf( ParameterIndicator + param) + param.Length + 1);
-                    // figure out the parameter going backwards
-                    /*
-                    int charindex = sql.IndexOf("?") - 1;
-                    do
-                    {
-                        if (" ".Equals(sql[charindex]))
-                        {
-                            string temp = sql.Substring(charindex, sql.IndexOf("?") - charindex);
-                            paramFound = true;
-                        }
-                        else
-                        {
-                            charindex--;
-                        }
-                    }
-                    while (paramFound == false);
-                    sql = sql.Substring(sql.IndexOf("?")+ 1);
-                    */
                 }
                 cmd.CommandText = dbTable;
 
@@ -542,15 +523,6 @@ namespace SimpleDAO
                 foreach (KeyValuePair<string, string> prop in props)
                 {
                     string property = prop.Key;
-                    //string column = prop.Value == null ? Utils.GetDBColumnName(property) : prop.Value
-                    /*
-                    if (string.IsNullOrEmpty(prop.Value))
-                    {
-                        //props.Remove(property);
-                        props[property]. = Utils.GetDBColumnName(property);
-                    }
-
-                    string column = prop.Value;*/
                     string column = prop.Value ?? Utils.GetDBColumnName(property);
 
                     if (log.IsDebugEnabled) { log.Debug("buildSelectDbCommand - get property '" + property + "' for column '" + column + "'"); }
@@ -593,32 +565,11 @@ namespace SimpleDAO
                             Utils.AddPropParamToCmd(cmd, property, propValue,ParameterIndicator);
                         }
                     }
-                    /*
-                    if (obj.DBOrderBy != null && obj.DBOrderBy.ContainsKey(prop.Key) )
-                    {
-                        if (ob == null)
-                        {
-                            ob = new StringBuilder(" ORDER BY ");
-                        }
-                        else
-                        {
-                            ob.Append(", ");
-                        }
-                        ob.Append(column);
-                        if ( !obj.DBOrderBy[prop.Key] )
-                        {
-                            ob.Append(" DESC");
-                        }
-
-                    }
-                    */
-
                 }
 
                 // deal with order by
                 if (orderedColumns != null && orderedColumns.Count > 0)
                 {
-                    //ob = new StringBuilder(" ORDER BY ");
                     foreach (KeyValuePair<int, SortedColumn> orderBy in orderedColumns)
                     {
                         // see if the property has an associated column in props
@@ -662,11 +613,11 @@ namespace SimpleDAO
 			switch (propTypeName)
 			{
 				case "Int32":
+					return (int)value == NullIntValue;
 				case "Single":
+					return (Single)value == NullIntValue;
 				case "Double":
 					return (Double)value == NullIntValue;
-				case "String":
-					return (string)value == NullStringValue;
 				case "DateTime":
 					return (DateTime)value == NullDateTimeValue;
 				default:
