@@ -79,34 +79,26 @@ namespace SimpleDAO
                 {
                     case "Int32":
                         param.DbType = DbType.Int32;
-                        if (propValue == null)
-                            param.Value = null;
-                        else
-                            param.Value = (int)propValue;
+                        param.Value = (int)propValue;
                         break;
                     case "String":
                         param.DbType = DbType.String;
-                        param.Value = propValue == null ? null : (string)propValue;
+                        param.Value = (string)propValue;
                         break;
                     case "DateTime":
                         param.DbType = DbType.DateTime;
-                        if (propValue == null)
-                            param.Value = null;
-                        else
-                            param.Value = (DateTime)propValue;
+                        param.Value = (DateTime)propValue;
                         break;
                     case "Single":
                         param.DbType = DbType.Single;
-                        if (propValue == null)
-                            param.Value = null;
-                        else
-                            param.Value = (Single)propValue;
+                        param.Value = (Single)propValue;
+                        break;
+                    case "Byte[]":
+                        param.DbType = DbType.Binary;
+                        param.Value = (byte[])propValue;
                         break;
                     default:
-                        if (propValue == null)
-                            param.Value = null;
-                        else
-                            param.Value = propValue.ToString();
+                        param.Value = propValue.ToString();
                         break;
 
 
