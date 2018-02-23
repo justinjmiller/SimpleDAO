@@ -2,3 +2,14 @@
 ---
 added nullValue to Column and Nullable Annotations to allow for SELECT * FROM TABLE WHERE COLUMN IS NULL
 
+2.7
+---
+insert/update blob values
+
+2.8
+---
+fix reused props hashmap in simpleSelectList
+
+2.9
+---
+dynamic update statements

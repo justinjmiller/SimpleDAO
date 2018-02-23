@@ -50,7 +50,7 @@ public class SimpleDAO<T>
      */
     public void simpleInsert( Connection con, T bean ) throws SQLException
     {
-        simpleInsert( con, bean, getBeanDescriptor(bean) );
+        simpleInsert(con, bean, getBeanDescriptor(bean));
     }
 
 
@@ -66,28 +66,10 @@ public class SimpleDAO<T>
      */
     public void simpleInsert( Connection con, T bean, BeanDescriptor description ) throws SQLException
     {
-        //ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
-
-        //String sql = buildInsertSQL( bean, description, bindVariables);
-        //if ( sqlLog.isDebugEnabled() ) { sqlLog.debug("simpleInsert SQL:" + sql); }
-/*
-        try
-        {
-*/
             //todo: refactor this back
             PreparedStatement ps = buildInsertStatement(bean, description, con);
-//            PreparedStatement ps = con.prepareStatement( sql );
-            //Utils.bindVariables( ps, bindVariables);
             ps.executeUpdate();
             ps.close();
-/*
-        }
-        catch ( SQLException e )
-        {
-            log.error(e);
-            throw new SQLException ("A database occurred while inserting: " + e.getMessage(), e);
-        }
-*/
     }
 
     public T simpleSelect( T criteria ) throws SQLException
@@ -109,27 +91,15 @@ public class SimpleDAO<T>
     public T simpleSelect( Connection con, T criteria) throws SQLException
     {
         if ( log.isDebugEnabled() ) { log.debug("Get the beans properties");}
-
-/*
-        Map<String,ColumnDefinition> properties = null;
-        if ( criteria instanceof SimpleBean)
-            properties = ((SimpleBean)criteria).describe();
-        else
-            properties = ReflectionUtils.getBeanPropertyDBColumnMap(criteria );
-
-        return simpleSelect( con, criteria, properties );
-*/
         return simpleSelect(con, criteria, getBeanDescriptor(criteria));
     }
 
 
     public T simpleSelect( Connection con, T criteria, BeanDescriptor descriptor ) throws SQLException
-//    public T simpleSelect( Connection con, T criteria, Map<String,ColumnDefinition> properties ) throws SQLException
 	{
 		if ( log.isDebugEnabled() ) { log.debug("call simpleSelectList and get the first bean");}
 
 		ArrayList<T> beanList = simpleSelectList(con, criteria, descriptor);
-//		ArrayList<T> beanList = simpleSelectList(con, criteria, properties);
 		if ( beanList.size() > 0 )
 		{
 			return beanList.get(0);
@@ -157,143 +127,112 @@ public class SimpleDAO<T>
 
     public ArrayList<T> simpleSelectList( Connection con, T criteria) throws SQLException
     {
-/*
-        Map<String,ColumnDefinition> properties = null;
-        if ( criteria instanceof SimpleBean)
-            properties = ((SimpleBean)criteria).describe();
-        else
-            properties = ReflectionUtils.getBeanPropertyDBColumnMap(criteria );
-        return simpleSelectList( con, criteria, properties );
-*/
         return simpleSelectList( con, criteria, getBeanDescriptor(criteria));
     }
 
     public ArrayList<T> simpleSelectList( Connection con, T bean, BeanDescriptor descriptor ) throws SQLException
     {
         ArrayList<T> beanList = new ArrayList<T>();
-        //ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
-//        Map<String,ColumnDefinition> columns = Utils.getColumnMapFromProps( properties );
         Map<String,String> columnPropertyMap = Utils.getColumnPropertyMap( descriptor.getPropertyMap());
 
-        // get SQL statement
-        //String sql = buildSelectSQL( bean, columns, bindVariables );
-        //if ( sqlLog.isDebugEnabled() ) { sqlLog.debug("simpleSelectList SQL:" + sql); }
+        PreparedStatement ps = buildSelectStatement( bean, descriptor, con );
+        ResultSet rs = ps.executeQuery();
 
-        //try
-        //{
-            //PreparedStatement ps = con.prepareStatement( sql );
-            //Utils.bindVariables( ps, bindVariables);
-            PreparedStatement ps = buildSelectStatement( bean, descriptor, con );
-            ResultSet rs = ps.executeQuery();
+        ResultSetMetaData metaData = rs.getMetaData();
 
+        int columnCount = metaData.getColumnCount();
 
-            ResultSetMetaData metaData = rs.getMetaData();
-
-            int columnCount = metaData.getColumnCount();
-
-            while ( rs.next() )
+        while ( rs.next() )
+        {
+            HashMap<String,Object> props = new HashMap<String,Object>();
+            for ( int i = 1; i <= columnCount ; i++)
             {
-                HashMap<String,Object> props = new HashMap<String,Object>();
-                for ( int i = 1; i <= columnCount ; i++)
+                if ( columnPropertyMap.containsKey(metaData.getColumnName((i))))
                 {
-                    if ( columnPropertyMap.containsKey(metaData.getColumnName((i))))
+                    if ( metaData.getColumnType(i) == Types.BLOB )
                     {
-                        if ( metaData.getColumnType(i) == Types.BLOB )
-                        {
-                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a BLOB");}
+                        if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a BLOB");}
 
-                            Blob blob = rs.getBlob( metaData.getColumnName(i) );
+                        Blob blob = rs.getBlob( metaData.getColumnName(i) );
 
-                            if ( blob != null )
-                            {
-                                if (log.isDebugEnabled())
-                                {
-                                    log.debug("simpleSelectList - column # '" + i + "' BLOB is not null, write it to bean");
-                                }
-                                ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-                                BufferedInputStream bis = new BufferedInputStream(blob.getBinaryStream());
-
-                                byte[] buffer = new byte[1024];
-                                int curByte;
-                                try
-                                {
-                                    while ((curByte = bis.read(buffer, 0, buffer.length)) != -1)
-                                    {
-                                        baos.write(buffer, 0, curByte);
-                                    }
-                                } catch (IOException e)
-                                {
-                                    log.error("Unable to write BLOB", e);
-                                    throw new RuntimeException("Unable to read the blob from the database", e);
-                                }
-                                props.put( Utils.getCamelCaseColumnName( metaData.getColumnName(i) ), baos.toByteArray() );
-                            }
-                        }
-                        else if  ( metaData.getColumnType(i) == Types.CLOB )
+                        if ( blob != null )
                         {
                             if (log.isDebugEnabled())
                             {
-                                log.debug("simpleSelectList - write CLOB to bean'");
+                                log.debug("simpleSelectList - column # '" + i + "' BLOB is not null, write it to bean");
                             }
-                            props.put(columnPropertyMap.get(metaData.getColumnName(i)), rs.getString(i));
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+                            BufferedInputStream bis = new BufferedInputStream(blob.getBinaryStream());
 
-                        }
-                        else if ( metaData.getColumnType(i) == Types.DATE )
-                        {
-                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a DATE");}
-                            props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTimestamp(i) );
-                        }
-                        else if ( metaData.getColumnType(i) == Types.TIME )
-                        {
-                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIME");}
-                            props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTime(i) );
-                        }
-                        else if ( metaData.getColumnType(i) == Types.TIMESTAMP )
-                        {
-                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIMESTAMP");}
-                            props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTimestamp(i) );
-                        }
-                        else
-                        {
-                            if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is not special");}
-                            //props.put( Utils.getCamelCaseColumnName( metaData.getColumnName(i) ), rs.getString(i) );
-                            props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getString(i) );
+                            byte[] buffer = new byte[1024];
+                            int curByte;
+                            try
+                            {
+                                while ((curByte = bis.read(buffer, 0, buffer.length)) != -1)
+                                {
+                                    baos.write(buffer, 0, curByte);
+                                }
+                            } catch (IOException e)
+                            {
+                                log.error("Unable to write BLOB", e);
+                                throw new RuntimeException("Unable to read the blob from the database", e);
+                            }
+                            props.put( Utils.getCamelCaseColumnName( metaData.getColumnName(i) ), baos.toByteArray() );
                         }
                     }
+                    else if  ( metaData.getColumnType(i) == Types.CLOB )
+                    {
+                        if (log.isDebugEnabled())
+                        {
+                            log.debug("simpleSelectList - write CLOB to bean'");
+                        }
+                        props.put(columnPropertyMap.get(metaData.getColumnName(i)), rs.getString(i));
 
-				}
-
-                // create the return bean
-                //Type pt = bean.getClass().getGenericSuperclass();
-                T newBean;
-                try
-                {
-                    newBean = (T)bean.getClass().newInstance();
+                    }
+                    else if ( metaData.getColumnType(i) == Types.DATE )
+                    {
+                        if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a DATE");}
+                        props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTimestamp(i) );
+                    }
+                    else if ( metaData.getColumnType(i) == Types.TIME )
+                    {
+                        if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIME");}
+                        props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTime(i) );
+                    }
+                    else if ( metaData.getColumnType(i) == Types.TIMESTAMP )
+                    {
+                        if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIMESTAMP");}
+                        props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTimestamp(i) );
+                    }
+                    else
+                    {
+                        if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is not special");}
+                        props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getString(i) );
+                    }
                 }
-                catch (Exception e)
-                {
-                    log.error("Unable to create new bean", e);
-                    throw new RuntimeException("Unable to instantiate the new Object",e);
-                }
-                //T newBean = (T)((Class)pt).newInstance();
-                //T newBean = (T)((Class)((ParameterizedType)pt).getActualTypeArguments()[0]).newInstance();
 
-/*
-                if ( newBean instanceof SimpleBean)
-                    ((SimpleBean)newBean).populate( props );
-*/
-                ReflectionUtils.populateBean(newBean,props);
-                beanList.add( newBean );
             }
-            ps.close();
-        //}
-/*
-        catch ( SQLException e )
-        {
-            log.error(e);
-            throw new SQLException("A database error occurred while selecting the data: " + e.getMessage() ,e);
+
+            // create the return bean
+            //Type pt = bean.getClass().getGenericSuperclass();
+            //T newBean = (T)((Class)pt).newInstance();
+            //T newBean = (T)((Class)((ParameterizedType)pt).getActualTypeArguments()[0]).newInstance();
+            T newBean;
+            try
+            {
+                newBean = (T)bean.getClass().newInstance();
+            }
+            catch (Exception e)
+            {
+                log.error("Unable to create new bean", e);
+                throw new RuntimeException("Unable to instantiate the new Object",e);
+            }
+
+            ReflectionUtils.populateBean(newBean,props);
+            beanList.add( newBean );
         }
-*/
+        ps.close();
+
         return beanList;
     }
 
@@ -325,7 +264,7 @@ public class SimpleDAO<T>
      */
     public void simpleUpdate( Connection con, T bean ) throws SQLException
     {
-        simpleUpdate( con, bean , getBeanDescriptor(bean) );
+        simpleUpdate(con, bean, getBeanDescriptor(bean));
     }
 
     /**
@@ -343,24 +282,10 @@ public class SimpleDAO<T>
     {
         ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
 
-//        String sql = buildUpdateSQL( bean, description, bindVariables);
-
-//        try
-//        {
             //todo: refactor this back
             PreparedStatement ps = buildUpdateStatement(bean, description, con);
-//            PreparedStatement ps = con.prepareStatement( sql );
-//            Utils.bindVariables( ps, bindVariables);
             ps.executeUpdate();
             ps.close();
-/*
-        }
-        catch ( SQLException e )
-        {
-            log.error(e);
-            throw new SQLException("A database error occurred while saving: " + e.getMessage() ,e);
-        }
-*/
     }
 
     public void simpleDelete( T bean ) throws SQLException
@@ -387,7 +312,7 @@ public class SimpleDAO<T>
      */
     public void simpleDelete( Connection con, T bean ) throws SQLException
     {
-        simpleDelete( con, bean , getBeanDescriptor(bean) );
+        simpleDelete(con, bean, getBeanDescriptor(bean));
     }
 
 
@@ -403,30 +328,15 @@ public class SimpleDAO<T>
      */
     public void simpleDelete( Connection con, T bean, BeanDescriptor description ) throws SQLException
     {
-//        ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
-
-//        String sql = buildDeleteSQL( bean, description, bindVariables);
-
-//        try
-//        {
             //todo: refactor this back
             PreparedStatement ps = buildDeleteStatement(bean, description, con);
-//            PreparedStatement ps = con.prepareStatement( sql );
-            //Utils.bindVariables( ps, bindVariables);
             ps.executeUpdate();
             ps.close();
-/*
-        }
-        catch ( SQLException e )
-        {
-            log.error(e);
-            throw new SQLException("A database error occurred while deleting." ,e);
-        }
-*/
     }
 
     //-----------------------PRIVATE METHODS---------------------------------
 
+    //todo: handle BeanDescriptor SQL Statement
     private PreparedStatement buildInsertStatement(T bean, BeanDescriptor description, Connection con ) throws SQLException
     {
         ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
@@ -459,8 +369,6 @@ public class SimpleDAO<T>
                 throw new RuntimeException("Unable to get the bean property named '" + property + "'",e);
             }
 
-//            PropertyDescriptor pd = PropertyUtils.getPropertyDescriptor(bean, property);
-//            Object value = PropertyUtils.getProperty(bean, property);
 
             Class type = pd.getPropertyType();
 
@@ -488,12 +396,6 @@ public class SimpleDAO<T>
 
         if ( sqlLog.isDebugEnabled() ) { sqlLog.debug("buildInsertStatement SQL:" + sql); }
 
-/*
-        PreparedStatement ps = con.prepareStatement( sql.toString() );
-        Utils.bindVariables(ps, bindVariables);
-        return ps;
-*/
-//        return sql.toString();
         return Utils.prepareStatement(con, sql.toString(), bindVariables);
     }
 
@@ -502,49 +404,12 @@ public class SimpleDAO<T>
         String sql;
 
         ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
-/*
-        if ( getBeanDBTableName(bean).toUpperCase().contains("SELECT ") &&
-                getBeanDBTableName(bean).toUpperCase().contains("FROM "))
-*/
+
         if ( descriptor.getTable().toUpperCase().contains("SELECT ") &&
                 descriptor.getTable().toUpperCase().contains("FROM "))
         {
+            bindVariables = bindStaticSQLStatement(bean, descriptor);
             sql = descriptor.getTable();
-//            sql = getBeanDBTableName(bean);
-            String loopsql = descriptor.getTable();
-//            String loopsql = getBeanDBTableName(bean);
-            int paramCount = 0;
-            while (loopsql.contains("@"))
-            {
-                String param;
-                int paramStart = loopsql.indexOf("@") + 1;
-                int paramEnd = loopsql.indexOf(" ", paramStart);
-                if ( paramEnd > paramStart)
-                {
-                    param = loopsql.substring(paramStart, paramEnd );
-                }
-                else
-                {
-                    param = loopsql.substring(paramStart);
-                }
-                PropertyDescriptor pd;
-                Object value;
-                try
-                {
-                    pd = PropertyUtils.getPropertyDescriptor( bean, param);
-                    value = PropertyUtils.getProperty ( bean, param);
-                }
-                catch (Exception e)
-                {
-                    log.error("Unable to get bean property named '"+ param + "'",e);
-                    throw new RuntimeException("Unable to get the bean property named '" + param + "'",e);
-                }
-                paramCount ++;
-                bindVariables.add( new BoundVariable( paramCount, descriptor.getPropertyMap().get(param).getName(), pd.getPropertyType(), value));
-//                bindVariables.add( new BoundVariable( paramCount, Utils.getPropertyDBName(param), pd.getPropertyType(), value));
-                sql = sql.replace("@" + param, "?");
-                loopsql = loopsql.substring( loopsql.indexOf("@" + param) + param.length());
-            }
         }
         else
         {
@@ -554,23 +419,14 @@ public class SimpleDAO<T>
             StringBuilder orderSQL = new StringBuilder("");
 
             whereSQL.append( descriptor.getTable() );
-//            whereSQL.append( getBeanDBTableName(bean) );
-
-//            Iterator iter = props.keySet().iterator();
 
             int colCount = 0;
             int whereCount = 0;
-//            int orderCount = 0;
 
-//            for (String property : descriptor.getPropertyMap().keySet())
             for (Map.Entry<String,ColumnDefinition> ent: descriptor.getPropertyMap().entrySet())
-//            while ( iter.hasNext() )
             {
                 String property = ent.getKey();
-//                String property = (String) iter.next();
-                //String column = descriptor.getPropertyMap().get(property).getName();
                 String column = ent.getValue().getName();
-//                String column = props.get(property);
 
                 if ( log.isDebugEnabled()) { log.debug("buildSelectStatement - get property '" + property + "' for column '" + column + "'");}
                 
@@ -595,36 +451,13 @@ public class SimpleDAO<T>
                 colCount++;
 
 
-                //if ( Utils.isPropertyNull( type, value ) )                                                               n
-                //{
-                    //continue;
-                    if ( ent.getValue().isNullable()  &&  Utils.isPropertyNull(type, value, ent.getValue().getNullValue()))
-                    {
-                        whereSQL.append(whereCount > 0 || whereSQL.toString().contains("WHERE") ? " AND " : " WHERE " )
-                            .append(column).append( " IS NULL ");
-                    }
-                //}
+                if ( ent.getValue().isNullable()  &&  Utils.isPropertyNull(type, value, ent.getValue().getNullValue()))
+                {
+                    whereSQL.append(whereCount > 0 || whereSQL.toString().contains("WHERE") ? " AND " : " WHERE " )
+                        .append(column).append( " IS NULL ");
+                }
                 else if ( !Utils.isPropertyNull( type, value ) )
                 {
-/*
-                    if ( whereCount == 0 )
-                    {
-                        whereSQL.append( " WHERE " );
-                    }
-                    else
-                    {
-                        whereSQL.append(" AND " );
-                    }
-                    whereSQL.append( column );
-                    if (value.toString().contains("%"))
-                    {
-                        whereSQL.append( " LIKE ? " );
-                    }
-                    else
-                    {
-                        whereSQL.append( " = ? " );
-                    }
-*/
                     whereSQL.append(whereCount > 0 || whereSQL.toString().contains("WHERE") ? " AND " : " WHERE " )
                         .append(column).append( value.toString().contains("%") ? " LIKE ? " : " = ? ");
                     whereCount ++;
@@ -653,125 +486,121 @@ public class SimpleDAO<T>
             selectSQL.append( orderSQL );
             sql = selectSQL.toString();
         }
-/*
-        PreparedStatement stmt = con.prepareStatement(sql);
-        Utils.bindVariables(stmt, bindVariables);
-        return stmt;
-*/
         if ( sqlLog.isDebugEnabled() ) { sqlLog.debug("buildSelectStatement SQL:" + sql); }
 
         return Utils.prepareStatement(con, sql, bindVariables);
     }
 
-    private PreparedStatement buildUpdateStatement( T bean, BeanDescriptor description, Connection con) throws SQLException
+    private PreparedStatement buildUpdateStatement( T bean, BeanDescriptor descriptor, Connection con) throws SQLException
     {
-        ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
-        StringBuilder sql = new StringBuilder( "UPDATE " );
-        StringBuilder whereSQL = new StringBuilder(" WHERE ");
-        ArrayList<BoundVariable> keyBindVariables = new ArrayList<BoundVariable>();
+        String sql;
+        ArrayList<BoundVariable> bindVariables ;
 
-        int columnCount = 0;
-        int keyCount = 0;
-
-        sql.append( description.getTable()  );
-
-        sql.append( " SET " );
-
-        String[] keys = description.getUpdateKeys();
-
-        for (String property : description.getPropertyMap().keySet())
+        if ( descriptor.getTable().toUpperCase().contains("UPDATE "))
         {
-            ColumnDefinition def = description.getPropertyMap().get(property);
-            String column = def.getName();
-            if (column == null || "".equals(column))
-            {
-                column = Utils.getPropertyDBName(property);
-            }
-//            PropertyDescriptor pd = PropertyUtils.getPropertyDescriptor(bean, property);
-//            Object value = PropertyUtils.getProperty(bean, property);
+            bindVariables = bindStaticSQLStatement(bean, descriptor);
+            sql = descriptor.getTable();
+        }
+        else
+        {
+            bindVariables = new ArrayList<BoundVariable>();
+            StringBuilder updateSQL = new StringBuilder("UPDATE ");
+            StringBuilder whereSQL = new StringBuilder(" WHERE ");
+            ArrayList<BoundVariable> keyBindVariables = new ArrayList<BoundVariable>();
 
-            PropertyDescriptor pd;
-            Object value;
-            try
-            {
-                pd = PropertyUtils.getPropertyDescriptor( bean, property );
-                value = PropertyUtils.getProperty ( bean, property );
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException("Unable to get the property '" + property + "'",e);
-            }
+            int columnCount = 0;
+            int keyCount = 0;
 
-            if ( isColumnAKey( keys,column ))
+            updateSQL.append(descriptor.getTable());
+
+            updateSQL.append(" SET ");
+
+            String[] keys = descriptor.getUpdateKeys();
+
+            for (String property : descriptor.getPropertyMap().keySet())
             {
-                //if ( ( (Integer) value).intValue()  < 1 )
-                if (Utils.isPropertyNull(pd.getPropertyType(), value))
+                ColumnDefinition def = descriptor.getPropertyMap().get(property);
+                String column = def.getName();
+                if (column == null || "".equals(column))
                 {
-                    throw new SimpleDAOException("Key may not have a null/0 value;");
+                    column = Utils.getPropertyDBName(property);
                 }
-                if (keyCount > 0)
-                {
-                    whereSQL.append(" AND ");
-                }
-                whereSQL.append(column);
-                whereSQL.append(" = ?");
 
-                //todo: this count can go away, just use the size of the key BB list
-                keyCount++;
-                keyBindVariables.add( new BoundVariable( keyCount, column, pd.getPropertyType(), value ) );
-            }
-            else
-            {
-                Class type = pd.getPropertyType();
-                StringBuilder col = new StringBuilder();
-                if (columnCount > 0 )
+                PropertyDescriptor pd;
+                Object value;
+                try
                 {
-                    col.append(", ");
+                    pd = PropertyUtils.getPropertyDescriptor(bean, property);
+                    value = PropertyUtils.getProperty(bean, property);
+                } catch (Exception e)
+                {
+                    throw new RuntimeException("Unable to get the property '" + property + "'", e);
                 }
-                col.append(column);
-                col.append(" = ");
 
-                if ( Utils.isPropertyNull( type, value) )
-				{
-                    if ( def.isNullable() )
+                if (isColumnAKey(keys, column))
+                {
+                    if (Utils.isPropertyNull(pd.getPropertyType(), value))
                     {
-                        log.debug("set {0} to NULL",column);
-//                        col.append("NULL");
-                        //columnCount++;
-                        col.append("?");
-                        columnCount++;
-                        bindVariables.add(new BoundVariable(columnCount, column, type, null));
+                        throw new SimpleDAOException("Key may not have a null/0 value;");
+                    }
+                    if (keyCount > 0)
+                    {
+                        whereSQL.append(" AND ");
+                    }
+                    whereSQL.append(column);
+                    whereSQL.append(" = ?");
+
+                    //todo: this count can go away, just use the size of the key BB list
+                    keyCount++;
+                    keyBindVariables.add(new BoundVariable(keyCount, column, pd.getPropertyType(), value));
+                }
+                else
+                {
+                    Class type = pd.getPropertyType();
+                    StringBuilder col = new StringBuilder();
+                    if (columnCount > 0)
+                    {
+                        col.append(", ");
+                    }
+                    col.append(column);
+                    col.append(" = ");
+
+                    if (Utils.isPropertyNull(type, value))
+                    {
+                        if (def.isNullable())
+                        {
+                            log.debug("set {0} to NULL", column);
+                            col.append("?");
+                            columnCount++;
+                            bindVariables.add(new BoundVariable(columnCount, column, type, null));
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else
                     {
-                        continue;
+                        col.append("?");
+                        columnCount++;
+                        bindVariables.add(new BoundVariable(columnCount, column, type, value));
                     }
-				}
-                else
-                {
-                    col.append("?");
-                    columnCount++;
-                    bindVariables.add(new BoundVariable(columnCount, column, type, value));
+                    updateSQL.append(col);
                 }
-                sql.append(col);
             }
+
+            // add the keys to the bind variable list
+            for (BoundVariable bv : keyBindVariables)
+            {
+                bindVariables.add(new BoundVariable(columnCount + bv.getPosition(), bv.getName(), bv.getType(), bv.getValue()));
+            }
+
+            updateSQL.append(whereSQL);
+            sql = updateSQL.toString();
         }
 
-        // add the keys to the bind variable list
-        for ( BoundVariable bv : keyBindVariables)
-        {
-            bindVariables.add( new BoundVariable(columnCount + bv.getPosition(), bv.getName(), bv.getType(), bv.getValue() ) );
-        }
-
-        sql.append( whereSQL );
-//        return sql.toString();
         if ( sqlLog.isDebugEnabled() ) { sqlLog.debug("buildUpdateStatement SQL:" + sql); }
-/*
-        PreparedStatement stmt = con.prepareStatement(sql.toString());
-        Utils.bindVariables(stmt, bindVariables);
-        return stmt;
-*/
-        return Utils.prepareStatement(con, sql.toString(), bindVariables);
+        return Utils.prepareStatement(con, sql, bindVariables);
     }
 
     private PreparedStatement buildDeleteStatement( T bean, BeanDescriptor description,Connection con ) throws SQLException
@@ -782,22 +611,11 @@ public class SimpleDAO<T>
         sql.append( description.getTable() );
         sql.append( " WHERE " );
 
-//        Iterator iter = properties.keySet().iterator();
-
         int colCount = 0;
-/*
-        while ( iter.hasNext() )
-        {
-*/
         for (String property : description.getPropertyMap().keySet())
         {
             String column = description.getPropertyMap().get( property ).getName();
-//            if ( column == null || "".equals( column ) )
-//            {
-//                column = Utils.getPropertyDBName( property );
-//            }
-//            PropertyDescriptor pd = PropertyUtils.getPropertyDescriptor( bean, property );
-//            Object value = PropertyUtils.getProperty ( bean, property );
+
             PropertyDescriptor pd;
             Object value;
             try
@@ -811,18 +629,6 @@ public class SimpleDAO<T>
             }
             Class type = pd.getPropertyType();
 
-/*
-            if ( value != null )
-            {
-                if  ( ( type == Integer.class || "int".equals( type.getName() ) ) &&  ( ((Integer)value).intValue()  < 0 ) )
-                {
-                    continue;
-                }
-*/
-/*
-            if ( value == null ||
-                 ( ( type == Integer.class || "int".equals( type.getName() ) ) &&  ( ((Integer)value).intValue()  < 0 ) ) )
-*/
             if ( !Utils.isPropertyNull( type, value ) )
             {
 
@@ -836,156 +642,10 @@ public class SimpleDAO<T>
                 bindVariables.add( new BoundVariable( colCount, column, type, value ));
             }
         }
-        //return sql.toString();
         if ( sqlLog.isDebugEnabled() ) { sqlLog.debug("buildDeleteStatement SQL:" + sql); }
-//        PreparedStatement stmt = con.prepareStatement(sql.toString());
-//        Utils.bindVariables(stmt, bindVariables);
-//        return stmt;
         return Utils.prepareStatement(con, sql.toString(), bindVariables);
     }
 
-/*
-    private String buildSelectSQL( T bean, Map<String,ColumnDefinition> columns, ArrayList<BoundVariable> bindVariables ) throws SQLException
-    {
-        if ( getBeanDBTableName(bean).toUpperCase().contains("SELECT ") &&
-                getBeanDBTableName(bean).toUpperCase().contains("FROM "))
-        {
-            String sql = getBeanDBTableName(bean);
-            String loopsql = getBeanDBTableName(bean);
-            int paramCount = 0;
-            while ( loopsql.indexOf("@") > -1)
-            {
-                String param;
-                int paramStart = loopsql.indexOf("@") + 1;
-                int paramEnd = loopsql.indexOf(" ", paramStart);
-                if ( paramEnd > paramStart)
-                {
-                    param = loopsql.substring(paramStart, paramEnd - paramStart);
-                }
-                else
-                {
-                    param = loopsql.substring(paramStart);
-                }
-                PropertyDescriptor pd = null;
-                Object value = null;
-                try
-                {
-                    pd = PropertyUtils.getPropertyDescriptor( bean, param);
-                    value = PropertyUtils.getProperty ( bean, param);
-                }
-                catch (Exception e)
-                {
-                    log.error(e);
-                    throw new RuntimeException("Unable to get the bean property named '" + param + "'",e);
-                }
-                paramCount ++;
-                bindVariables.add( new BoundVariable( paramCount, Utils.getPropertyDBName(param), pd.getPropertyType(), value));
-                sql = sql.replace("@" + param, "?");
-                loopsql = loopsql.substring( loopsql.indexOf(param) + param.length());
-            }
-            return sql;
-        }
-
-        StringBuffer selectSQL = new StringBuffer( "SELECT ");
-        StringBuffer whereSQL = new StringBuffer(" FROM " );
-        StringBuffer orderSQL = new StringBuffer("");
-
-        whereSQL.append( getBeanDBTableName(bean) );
-
-        Iterator iter = columns.keySet().iterator();
-
-        int colCount = 0;
-        int whereCount = 0;
-        int orderCount = 0;
-        while ( iter.hasNext() )
-        {
-            String column = (String) iter.next();
-            String property = columns.get(column);
-            Map <Integer,SortedColumn> orderBy = getBeanOrderBy(bean);
-            if ( orderBy != null && orderBy.get(property) != null )
-            {
-                if ( orderCount == 0 )
-                {
-                    orderSQL.append( " ORDER BY ");
-                }
-                else
-                {
-                    orderSQL.append(", ");
-                }
-                orderSQL.append(column);
-//                if ( !orderBy.get(property))
-//                {
-//                    orderSQL.append(" DESC");
-//                }
-                orderCount++;
-            }
-
-            PropertyDescriptor pd = null;
-            Object value = null;
-            try
-            {
-                pd = PropertyUtils.getPropertyDescriptor( bean, property );
-                value = PropertyUtils.getProperty ( bean, property );
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException("Unable to get the property '" + property + "'",e);
-            }
-            Class type = pd.getPropertyType();
-
-            if ( colCount > 0 )
-            {
-                selectSQL.append(", " );
-            }
-            selectSQL.append( column );
-            colCount++;
-
-            // check to see if the value of this column is null
-            // if so, add it to the SELECT list
-            // if not, add it to WHERE clause
-//            if ( value == null ||
-//                 ( ( type == Integer.class || "int".equals( type.getName() ) ) &&  ( ((Integer)value).intValue()  < 0 ) ) )
-            if ( Utils.isPropertyNull( type, value ) )
-            {
-                //continue;
-            }
-            else
-            {
-                if ( whereCount == 0 )
-                {
-                    whereSQL.append( " WHERE " );
-                }
-                else
-                {
-                    whereSQL.append(" AND " );
-                }
-                whereSQL.append( column );
-                if ( value.toString().indexOf("%") > -1 )
-				{
-					whereSQL.append( " LIKE ? " );
-				}
-				else
-				{
-					whereSQL.append( " = ? " );
-				}
-                whereCount ++;
-                bindVariables.add( new BoundVariable( whereCount, column, type, value));
-            }
-//                if ( colCount > 0 )
-//                {
-//                    selectSQL.append(", " );
-//                }
-//                selectSQL.append( Utils.getPropertyDBName( column ) );
-//                colCount++;
-//            }
-//            else
-//            {
-        }
-        selectSQL.append ( whereSQL );
-        selectSQL.append( orderSQL);
-        return selectSQL.toString();
-    }
-*/
     private BeanDescriptor getBeanDescriptor( T bean )
     {
         if ( bean instanceof SimpleBean)
@@ -1006,40 +666,42 @@ public class SimpleDAO<T>
         }
         return false;
     }
-    /*
-    private String getBeanDBTableName(T bean )
+
+    private ArrayList<BoundVariable> bindStaticSQLStatement(T bean, BeanDescriptor descriptor )
     {
-        //ParameterizedType pt = (ParameterizedType)bean.getClass().getGenericSuperclass();
-        //T newBean = (T)((Class)pt.getActualTypeArguments()[0]).newInstance();
-        if ( bean instanceof SimpleBean)
-            return ((SimpleBean)bean).getDBTableName();
-        else
+        ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
+        String sql = descriptor.getTable();
+        String loopsql = sql;
+        int paramCount = 0;
+        while (loopsql.contains("@"))
         {
-            return ReflectionUtils.inferBeanDBTableName(bean);
+            String param;
+            int paramStart = loopsql.indexOf("@") + 1;
+            int paramEnd = loopsql.indexOf(" ", paramStart);
+            if (paramEnd > paramStart)
+            {
+                param = loopsql.substring(paramStart, paramEnd);
+            }
+            else
+            {
+                param = loopsql.substring(paramStart);
+            }
+            PropertyDescriptor pd;
+            Object value;
+            try
+            {
+                pd = PropertyUtils.getPropertyDescriptor(bean, param);
+                value = PropertyUtils.getProperty(bean, param);
+            } catch (Exception e)
+            {
+                log.error("Unable to get bean property named '" + param + "'", e);
+                throw new RuntimeException("Unable to get the bean property named '" + param + "'", e);
+            }
+            paramCount++;
+            bindVariables.add(new BoundVariable(paramCount, descriptor.getPropertyMap().get(param).getName(), pd.getPropertyType(), value));
+            sql = sql.replace("@" + param, "?");
+            loopsql = loopsql.substring(loopsql.indexOf("@" + param) + param.length());
         }
+        return bindVariables;
     }
-
-    private String[] getBeanDBUpdateKeys(T bean)
-    {
-        if ( bean instanceof SimpleBean)
-            return ((SimpleBean)bean).getDBPrimaryKey();
-        else
-            return ReflectionUtils.inferBeanDBUpdateKeys(bean);
-    }
-
-    private Map<Integer, SortedColumn> getBeanOrderBy( T bean )
-    {
-
-//        ParameterizedType pt = (ParameterizedType)bean.getClass().getGenericSuperclass();
-//        T newBean = (T)((Class)pt.getActualTypeArguments()[0]).newInstance();
-//        if ( newBean instanceof SimpleBean)
- //           return ((SimpleBean)newBean).getDBOrderByProps();
-
-        if ( bean instanceof SimpleBean)
-            return ((SimpleBean)bean).getDBOrderBy();
-        else
-            return ReflectionUtils.getBeanDBOrderBy(bean);
-    }
-    */
-
 }
