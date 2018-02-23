@@ -408,8 +408,7 @@ public class SimpleDAO<T>
         if ( descriptor.getTable().toUpperCase().contains("SELECT ") &&
                 descriptor.getTable().toUpperCase().contains("FROM "))
         {
-            bindVariables = bindStaticSQLStatement(bean, descriptor);
-            sql = descriptor.getTable();
+            sql = bindStaticSQLStatement(bean, descriptor, bindVariables);
         }
         else
         {
@@ -494,13 +493,12 @@ public class SimpleDAO<T>
     private PreparedStatement buildUpdateStatement( T bean, BeanDescriptor descriptor, Connection con) throws SQLException
     {
         String sql;
-        ArrayList<BoundVariable> bindVariables ;
+        ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>() ;
 
         if ( descriptor.getTable().toUpperCase().contains("UPDATE "))
         {
-            bindVariables = bindStaticSQLStatement(bean, descriptor);
-            sql = descriptor.getTable();
-        }
+            sql = bindStaticSQLStatement(bean, descriptor, bindVariables);
+       }
         else
         {
             bindVariables = new ArrayList<BoundVariable>();
@@ -667,9 +665,8 @@ public class SimpleDAO<T>
         return false;
     }
 
-    private ArrayList<BoundVariable> bindStaticSQLStatement(T bean, BeanDescriptor descriptor )
+    private String bindStaticSQLStatement(T bean, BeanDescriptor descriptor, ArrayList<BoundVariable>  bindVariables)
     {
-        ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
         String sql = descriptor.getTable();
         String loopsql = sql;
         int paramCount = 0;
@@ -702,6 +699,6 @@ public class SimpleDAO<T>
             sql = sql.replace("@" + param, "?");
             loopsql = loopsql.substring(loopsql.indexOf("@" + param) + param.length());
         }
-        return bindVariables;
+        return sql;
     }
 }
