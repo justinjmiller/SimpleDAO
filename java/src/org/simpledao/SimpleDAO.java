@@ -147,13 +147,13 @@ public class SimpleDAO<T>
             HashMap<String,Object> props = new HashMap<String,Object>();
             for ( int i = 1; i <= columnCount ; i++)
             {
-                if ( columnPropertyMap.containsKey(metaData.getColumnName((i))))
+                if ( columnPropertyMap.containsKey(metaData.getColumnName((i)).toUpperCase()))
                 {
                     if ( metaData.getColumnType(i) == Types.BLOB )
                     {
                         if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a BLOB");}
 
-                        Blob blob = rs.getBlob( metaData.getColumnName(i) );
+                        Blob blob = rs.getBlob( metaData.getColumnName(i).toUpperCase() );
 
                         if ( blob != null )
                         {
@@ -186,28 +186,28 @@ public class SimpleDAO<T>
                         {
                             log.debug("simpleSelectList - write CLOB to bean'");
                         }
-                        props.put(columnPropertyMap.get(metaData.getColumnName(i)), rs.getString(i));
+                        props.put(columnPropertyMap.get(metaData.getColumnName(i).toUpperCase()), rs.getString(i));
 
                     }
                     else if ( metaData.getColumnType(i) == Types.DATE )
                     {
                         if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a DATE");}
-                        props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTimestamp(i) );
+                        props.put( columnPropertyMap.get( metaData.getColumnName(i).toUpperCase()), rs.getTimestamp(i) );
                     }
                     else if ( metaData.getColumnType(i) == Types.TIME )
                     {
                         if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIME");}
-                        props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTime(i) );
+                        props.put( columnPropertyMap.get( metaData.getColumnName(i).toUpperCase()), rs.getTime(i) );
                     }
                     else if ( metaData.getColumnType(i) == Types.TIMESTAMP )
                     {
                         if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIMESTAMP");}
-                        props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getTimestamp(i) );
+                        props.put( columnPropertyMap.get( metaData.getColumnName(i).toUpperCase()), rs.getTimestamp(i) );
                     }
                     else
                     {
                         if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is not special");}
-                        props.put( columnPropertyMap.get( metaData.getColumnName(i)), rs.getString(i) );
+                        props.put( columnPropertyMap.get( metaData.getColumnName(i).toUpperCase()), rs.getString(i) );
                     }
                 }
 

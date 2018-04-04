@@ -624,7 +624,7 @@ public class Utils
         Map<String,String> columns = new HashMap<String,String>();
         for (String property : props.keySet())
         {
-            columns.put( props.get(property).getName(), property);
+            columns.put( props.get(property).getName().toUpperCase(), property);
         }
         return columns;
     }
