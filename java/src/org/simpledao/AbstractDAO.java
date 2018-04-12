@@ -32,9 +32,9 @@ public abstract class AbstractDAO<T>
                 con.close();
             }
         }
-        catch (SQLException ex)
+        catch ( SQLException ex)
         {
-            // no need to catch
+            log.error(ex.getMessage());
         }
     }
 
@@ -48,13 +48,11 @@ public abstract class AbstractDAO<T>
             con = getConnection();
             return dao.simpleSelectList(con, criteria);
         }
-/*
         catch ( SQLException ex)
         {
-            log.error(ex);
-            return null;
+            log.error(ex.getMessage());
+            throw ex;
         }
-*/
         finally
         {
             closeConnection(con);
@@ -71,13 +69,11 @@ public abstract class AbstractDAO<T>
             con = getConnection();
             return dao.simpleSelect(con, criteria);
         }
-/*
-        catch ( SQLException ex)
+        catch (SQLException ex)
         {
-            log.error(ex);
-            return null;
+            log.error(ex.getMessage());
+            throw ex;
         }
-*/
         finally
         {
             closeConnection(con);
@@ -94,12 +90,11 @@ public abstract class AbstractDAO<T>
             con = getConnection();
             dao.simpleInsert(con, criteria);
         }
-/*
         catch ( SQLException ex)
         {
-            log.error(ex);
+            log.error(ex.getMessage());
+            throw ex;
         }
-*/
         finally
         {
             closeConnection(con);
@@ -117,12 +112,11 @@ public abstract class AbstractDAO<T>
             con = getConnection();
             dao.simpleUpdate(con, criteria);
         }
-/*
         catch ( SQLException ex)
         {
-            log.error(ex);
+            log.error(ex.getMessage());
+            throw ex;
         }
-*/
         finally
         {
             closeConnection(con);
@@ -139,12 +133,11 @@ public abstract class AbstractDAO<T>
             con = getConnection();
             dao.simpleDelete(con, criteria);
         }
-/*
         catch ( SQLException ex)
         {
-            log.error(ex);
+            log.error(ex.getMessage());
+            throw ex;
         }
-*/
         finally
         {
             closeConnection(con);
