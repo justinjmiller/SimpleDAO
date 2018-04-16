@@ -50,7 +50,7 @@ public abstract class AbstractDAO<T>
         }
         catch ( SQLException ex)
         {
-            log.error(ex, ex.getMessage());
+            log.error(ex.getMessage(),ex);
             throw ex;
         }
         finally
@@ -71,7 +71,7 @@ public abstract class AbstractDAO<T>
         }
         catch (SQLException ex)
         {
-            log.error(ex, ex.getMessage());
+            log.error(ex.getMessage(),ex);
             throw ex;
         }
         finally
@@ -92,7 +92,7 @@ public abstract class AbstractDAO<T>
         }
         catch ( SQLException ex)
         {
-            log.error(ex, ex.getMessage());
+            log.error(ex.getMessage(),ex);
             throw ex;
         }
         finally
@@ -114,7 +114,7 @@ public abstract class AbstractDAO<T>
         }
         catch ( SQLException ex)
         {
-            log.error(ex, ex.getMessage());
+            log.error(ex.getMessage(),ex);
             throw ex;
         }
         finally
@@ -135,7 +135,7 @@ public abstract class AbstractDAO<T>
         }
         catch ( SQLException ex)
         {
-            log.error(ex, ex.getMessage());
+            log.error(ex.getMessage(),ex);
             throw ex;
         }
         finally
