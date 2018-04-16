@@ -149,7 +149,7 @@ public class SimpleDAO<T>
             {
                 if ( columnPropertyMap.containsKey(metaData.getColumnName((i)).toUpperCase()))
                 {
-                    if ( metaData.getColumnType(i) == Types.BLOB )
+                    if ( metaData.getColumnType(i) == Types.BLOB || metaData.getColumnTypeName(i).equalsIgnoreCase("bytea") )
                     {
                         if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a BLOB");}
 
@@ -180,7 +180,7 @@ public class SimpleDAO<T>
                             props.put( Utils.getCamelCaseColumnName( metaData.getColumnName(i) ), baos.toByteArray() );
                         }
                     }
-                    else if  ( metaData.getColumnType(i) == Types.CLOB )
+                    else if  ( metaData.getColumnType(i) == Types.CLOB || metaData.getColumnTypeName(i).equalsIgnoreCase("text") )
                     {
                         if (log.isDebugEnabled())
                         {
@@ -189,17 +189,17 @@ public class SimpleDAO<T>
                         props.put(columnPropertyMap.get(metaData.getColumnName(i).toUpperCase()), rs.getString(i));
 
                     }
-                    else if ( metaData.getColumnType(i) == Types.DATE )
+                    else if ( metaData.getColumnType(i) == Types.DATE || metaData.getColumnTypeName(i).equalsIgnoreCase("date") )
                     {
                         if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a DATE");}
                         props.put( columnPropertyMap.get( metaData.getColumnName(i).toUpperCase()), rs.getTimestamp(i) );
                     }
-                    else if ( metaData.getColumnType(i) == Types.TIME )
+                    else if ( metaData.getColumnType(i) == Types.TIME || metaData.getColumnTypeName(i).equalsIgnoreCase("time") )
                     {
                         if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIME");}
                         props.put( columnPropertyMap.get( metaData.getColumnName(i).toUpperCase()), rs.getTime(i) );
                     }
-                    else if ( metaData.getColumnType(i) == Types.TIMESTAMP )
+                    else if ( metaData.getColumnType(i) == Types.TIMESTAMP || metaData.getColumnTypeName(i).equalsIgnoreCase("timestamp"))
                     {
                         if ( log.isDebugEnabled() ) { log.debug("simpleSelectList - column # '" + i + "' is a TIMESTAMP");}
                         props.put( columnPropertyMap.get( metaData.getColumnName(i).toUpperCase()), rs.getTimestamp(i) );
@@ -604,7 +604,7 @@ public class SimpleDAO<T>
     private PreparedStatement buildDeleteStatement( T bean, BeanDescriptor description,Connection con ) throws SQLException
     {
         ArrayList<BoundVariable> bindVariables = new ArrayList<BoundVariable>();
-        StringBuilder sql = new StringBuilder( "DELETE ");
+        StringBuilder sql = new StringBuilder( "DELETE FROM ");
 
         sql.append( description.getTable() );
         sql.append( " WHERE " );
