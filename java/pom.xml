@@ -9,6 +9,14 @@
     <version>2.9.1</version>
     <name>SimpleDAO</name>
 
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>Simple DAO</name>
+      <url>https://maven.pkg.github.com/utahdws/webteam-simpledao-fork</url>
+    </repository>
+  </distributionManagement>
+  
     <dependencies>
         <dependency>
             <groupId>commons-beanutils</groupId>
